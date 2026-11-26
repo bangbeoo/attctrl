@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -191,26 +191,27 @@ body.demo .toggle{color:var(--amber)}
 <body>
 
 <header class="topbar">
-  <div class="brand">◎ Attenuator Console<small>v0.5</small></div>
-  <div class="seg" id="layoutSeg" title="Bố cục">
-    <button data-l="1"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/></svg>Toàn màn hình</button>
+  <div class="brand">◎ Attenuator Console<small>v0.6</small></div>
+  <div class="seg" id="layoutSeg" data-i18n-title="layout">
+    <button data-l="1"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/></svg><span data-i18n="fullscreen"></span></button>
     <button data-l="2"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/><line x1="9" y1="0" x2="9" y2="12" stroke="currentColor"/></svg>1/2</button>
     <button data-l="3"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/><line x1="6.2" y1="0" x2="6.2" y2="12" stroke="currentColor"/><line x1="11.8" y1="0" x2="11.8" y2="12" stroke="currentColor"/></svg>1/3</button>
     <button data-l="4"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/><line x1="4.75" y1="0" x2="4.75" y2="12" stroke="currentColor"/><line x1="9" y1="0" x2="9" y2="12" stroke="currentColor"/><line x1="13.25" y1="0" x2="13.25" y2="12" stroke="currentColor"/></svg>1/4</button>
   </div>
-  <button class="primary" id="btnAdd">＋ Thêm thiết bị</button>
-  <label class="toggle" title="Mô phỏng attenuator, không cần cổng COM"><input type="checkbox" id="demoChk"> Demo</label>
+  <button class="primary" id="btnAdd" data-i18n="addDevice"></button>
+  <label class="toggle" data-i18n-title="demoTip"><input type="checkbox" id="demoChk"> Demo</label>
   <div class="spacer"></div>
-  <span class="cfgname" id="cfgName">Chưa lưu cấu hình</span>
-  <button id="btnProto" title="Command giao tiếp">⌨ Giao thức</button>
-  <button id="btnOpen">📂 Mở XML</button>
-  <button id="btnSave">💾 Lưu XML</button>
-  <button id="btnConnAll">🔌 Kết nối tất cả</button>
-  <button id="btnDiscAll">⏏ Ngắt tất cả</button>
+  <div class="seg" id="langSeg" data-i18n-title="language"><button data-lang="en">EN</button><button data-lang="vi">VI</button></div>
+  <span class="cfgname" id="cfgName"></span>
+  <button id="btnProto" data-i18n-title="protoTip" data-i18n="protocol"></button>
+  <button id="btnOpen" data-i18n="openXml"></button>
+  <button id="btnSave" data-i18n="saveXml"></button>
+  <button id="btnConnAll" data-i18n="connAll"></button>
+  <button id="btnDiscAll" data-i18n="discAll"></button>
   <span class="clock" id="clock"></span>
   <input type="file" id="fileIn" accept=".xml" hidden>
 </header>
-<div class="warnbar" id="warn">⚠ Trình duyệt không hỗ trợ Web Serial — hãy mở bằng Chrome hoặc Edge. (Vẫn dùng được chế độ Demo.)</div>
+<div class="warnbar" id="warn" data-i18n="noSerial"></div>
 
 <main class="grid l3" id="grid"></main>
 
@@ -219,39 +220,39 @@ body.demo .toggle{color:var(--amber)}
 <section class="dev">
   <div class="dhead">
     <span class="no">01</span>
-    <input class="dname" type="text" title="Tên trạm (bấm để sửa)">
-    <button class="icon b-set" title="Cài đặt / Bảo trì">⚙</button>
-    <button class="icon b-max" title="Phóng to / thu nhỏ">⛶</button>
-    <button class="icon danger b-del" title="Xóa thiết bị">✕</button>
+    <input class="dname" type="text" data-i18n-title="nameTip">
+    <button class="icon b-set" data-i18n-title="settingsTip">⚙</button>
+    <button class="icon b-max" data-i18n-title="maxTip">⛶</button>
+    <button class="icon danger b-del" data-i18n-title="delTip">✕</button>
   </div>
   <div class="connrow">
-    <select class="port" title="Cổng COM"></select>
+    <select class="port" data-i18n-title="comPort"></select>
     <select class="baud" title="Baud rate">
       <option>1200</option><option>2400</option><option>4800</option><option>9600</option><option>19200</option>
       <option>38400</option><option>57600</option><option>115200</option>
     </select>
-    <button class="primary b-conn">Kết nối</button>
+    <button class="primary b-conn"></button>
   </div>
 
   <div class="toast"></div>
 
   <div class="dbody">
     <div class="info">
-      <div class="banner"><span class="bdot"></span><span class="btxt">OFFLINE</span><span class="bsub">Chưa kết nối</span></div>
+      <div class="banner"><span class="bdot"></span><span class="btxt">OFFLINE</span><span class="bsub"></span></div>
       <div class="posbox">
-        <div class="k"><span>Vị trí hiện tại</span><span class="rng-lbl"></span></div>
+        <div class="k"><span data-i18n="curPos"></span><span class="rng-lbl"></span></div>
         <div class="big"><span class="v-pos">—</span><small>steps</small></div>
         <div class="arrive"></div>
       </div>
       <div class="minis">
-        <div class="mini"><div class="k">Truyền qua</div><div class="mv"><span class="v-tra">—</span><small>%</small></div></div>
-        <div class="mini"><div class="k">Năng lượng TB</div><div class="mv"><span class="v-egy">—</span></div></div>
-        <div class="mini"><div class="k">Tham chiếu</div><div class="mv"><span class="v-ref">—</span></div></div>
+        <div class="mini"><div class="k" data-i18n="trans"></div><div class="mv"><span class="v-tra">—</span><small>%</small></div></div>
+        <div class="mini"><div class="k" data-i18n="egy"></div><div class="mv"><span class="v-egy">—</span></div></div>
+        <div class="mini"><div class="k" data-i18n="ref"></div><div class="mv"><span class="v-ref">—</span></div></div>
       </div>
     </div>
 
     <div class="ctrl">
-      <div class="vs" title="Kéo để chọn vị trí — thả chuột để gửi lệnh">
+      <div class="vs" data-i18n-title="sliderTip">
         <div class="vin">
           <div class="vt"><div class="vfill"></div></div>
           <div class="vneedle"></div>
@@ -259,16 +260,16 @@ body.demo .toggle{color:var(--amber)}
         </div>
       </div>
       <div class="side">
-        <div class="preset" data-k="max"   style="--c:var(--red)"><button class="pbtn"><span class="dot"></span>Maximum</button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
-        <div class="preset" data-k="prod"  style="--c:var(--green)"><button class="pbtn"><span class="dot"></span>Sản xuất</button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
-        <div class="preset" data-k="align" style="--c:var(--blue)"><button class="pbtn"><span class="dot"></span>Chỉnh tia</button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
-        <div class="grp" title="Tăng / giảm theo bước">
+        <div class="preset" data-k="max"   style="--c:var(--red)"><button class="pbtn"><span class="dot"></span><span data-i18n="p_max"></span></button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
+        <div class="preset" data-k="prod"  style="--c:var(--green)"><button class="pbtn"><span class="dot"></span><span data-i18n="p_prod"></span></button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
+        <div class="preset" data-k="align" style="--c:var(--blue)"><button class="pbtn"><span class="dot"></span><span data-i18n="p_align"></span></button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
+        <div class="grp" data-i18n-title="jogTip">
           <button class="jog b-minus">−</button>
-          <span class="gl">Bước</span><input type="number" class="stepw" min="1">
+          <span class="gl" data-i18n="step"></span><input type="number" class="stepw" min="1">
           <button class="jog b-plus">+</button>
         </div>
         <div class="grp">
-          <span class="gl">Đặt vị trí</span>
+          <span class="gl" data-i18n="setPos"></span>
           <input type="number" class="setval" placeholder="steps">
           <button class="primary b-go">GO</button>
         </div>
@@ -278,21 +279,21 @@ body.demo .toggle{color:var(--amber)}
     <div class="foot">
       <div class="seg mode">
         <button data-m="manual" class="active">✋ Manual</button>
-        <button data-m="auto" class="auto" title="Cần phần cứng đo năng lượng">⟳ Automatic<span class="badge">Đang phát triển</span></button>
+        <button data-m="auto" class="auto" data-i18n-title="autoTip">⟳ Automatic<span class="badge" data-i18n="inDev"></span></button>
       </div>
       <div class="spacer"></div>
-      <span class="devinfo" title="AVE? · CYC? · STATR? — bấm để đọc lại">AVE — · CYC — · Loop —</span>
-      <button class="b-log" title="Ẩn/hiện log">☰ Log</button>
+      <span class="devinfo" data-i18n-title="devinfoTip">AVE — · CYC — · Loop —</span>
+      <button class="b-log" data-i18n-title="logTip">☰ Log</button>
     </div>
 
     <div class="logbox">
       <div class="log"></div>
       <div class="tbar">
-        <input class="msg" type="text" placeholder="Lệnh tự do (Enter)">
-        <button class="b-send">Gửi</button>
-        <label title="Hiện các lệnh STAT?/POS? tự động"><input type="checkbox" class="showpoll"> Polling</label>
-        <button class="icon b-clear" title="Xóa log">🧹</button>
-        <button class="icon b-savelog" title="Xuất log .txt">⤓</button>
+        <input class="msg" type="text" data-i18n-ph="cmdPh">
+        <button class="b-send" data-i18n="send"></button>
+        <label data-i18n-title="pollTip"><input type="checkbox" class="showpoll"> Polling</label>
+        <button class="icon b-clear" data-i18n-title="clearTip">🧹</button>
+        <button class="icon b-savelog" data-i18n-title="exportTip">⤓</button>
       </div>
     </div>
   </div>
@@ -301,62 +302,154 @@ body.demo .toggle{color:var(--amber)}
 
 <!-- ===== Device settings ===== -->
 <div class="modal" id="setModal"><div class="box">
-  <h3>Cài đặt: <span id="setTitle"></span></h3>
-  <h4>Cổng COM</h4>
+  <h3><span data-i18n="settingsTitle"></span> <span id="setTitle"></span></h3>
+  <h4 data-i18n="comPort"></h4>
   <div class="form">
     <label>Data bits</label><select id="s_dataBits"><option>7</option><option>8</option></select>
     <label>Parity</label><select id="s_parity"><option value="none">None</option><option value="even">Even</option><option value="odd">Odd</option></select>
     <label>Stop bits</label><select id="s_stopBits"><option>1</option><option>2</option></select>
     <label>Flow control</label><select id="s_flow"><option value="none">None</option><option value="hardware">RTS/CTS</option></select>
   </div>
-  <div class="note">Chuẩn ACM: D-sub 9 chân (RXD, TXD, GND), 9600 bps, 8 data bits, 1 stop bit, parity OFF, không handshake. Cáp 1:1.</div>
-  <h4>Giới hạn an toàn (steps)</h4>
+  <div class="note" data-i18n="portNote"></div>
+  <h4 data-i18n="limits"></h4>
   <div class="form">
     <label>Min</label><input type="number" id="s_min">
     <label>Max</label><input type="number" id="s_max">
   </div>
-  <div class="note">Mọi lệnh POS= đều bị giới hạn trong khoảng này. Theo tài liệu, dải thực tế ≈ 425 … 8000 tùy công tắc hành trình.</div>
-  <h4>Bảo trì</h4>
-  <div class="row" style="justify-content:flex-start"><button class="danger" id="s_home">⌂ HOME (về vị trí tham chiếu 50%)</button></div>
-  <div class="note">Chỉ dùng khi attenuator bị mất định vị. Bình thường HOME tự chạy khi bật bộ điều khiển.</div>
-  <div class="row"><button id="setCancel">Hủy</button><button class="primary" id="setOk">Lưu</button></div>
+  <div class="note" data-i18n="limitsNote"></div>
+  <h4 data-i18n="maint"></h4>
+  <div class="row" style="justify-content:flex-start"><button class="danger" id="s_home" data-i18n="homeBtn"></button></div>
+  <div class="note" data-i18n="homeNote"></div>
+  <div class="row"><button id="setCancel" data-i18n="cancel"></button><button class="primary" id="setOk" data-i18n="save"></button></div>
 </div></div>
 
 <!-- ===== Protocol ===== -->
 <div class="modal" id="protoModal"><div class="box">
-  <h3>Giao thức command</h3>
-  <div class="note"><b>{v}</b> = giá trị steps, <b>{v4}</b> = giá trị đệm đủ 4 chữ số (VD 0425). Các ô "Nhận …" là regex; nhóm (…) đầu tiên là giá trị.</div>
+  <h3 data-i18n="protoTitle"></h3>
+  <div class="note" data-i18n-html="protoNote"></div>
   <div class="form" id="protoForm"></div>
-  <div class="row"><button id="protoReset">Khôi phục mặc định</button><div class="spacer"></div><button id="protoCancel">Hủy</button><button class="primary" id="protoOk">Lưu</button></div>
+  <div class="row"><button id="protoReset" data-i18n="resetDef"></button><div class="spacer"></div><button id="protoCancel" data-i18n="cancel"></button><button class="primary" id="protoOk" data-i18n="save"></button></div>
 </div></div>
 
 <script>
+/* ======================= I18N (EN default / VI) ======================= */
+const I18N={
+en:{
+  layout:'Layout', fullscreen:'Full screen', addDevice:'＋ Add device', demoTip:'Simulate attenuators — no COM port needed', language:'Language',
+  notSaved:'Config not saved', protoTip:'Communication commands', protocol:'⌨ Protocol', openXml:'📂 Open XML', saveXml:'💾 Save XML',
+  connAll:'🔌 Connect all', discAll:'⏏ Disconnect all',
+  noSerial:'⚠ This browser does not support Web Serial — please open in Chrome or Edge. (Demo mode still works.)',
+  nameTip:'Station name (click to edit)', settingsTip:'Settings / Maintenance', maxTip:'Maximize / restore', delTip:'Remove device',
+  comPort:'COM port', connect:'Connect', disconnect:'Disconnect',
+  curPos:'Current position', trans:'Transmission', egy:'Avg. energy', ref:'Reference',
+  sliderTip:'Drag to choose a position — release to send', p_max:'Maximum', p_prod:'Production', p_align:'Alignment',
+  jogTip:'Step down / up', step:'Step', setPos:'Set position', autoTip:'Requires energy measurement hardware', inDev:'In development',
+  devinfoTip:'AVE? · CYC? · STATR? — click to re-read', logTip:'Show / hide log', cmdPh:'Free command (Enter)', send:'Send',
+  pollTip:'Show automatic STAT?/POS?/TRA? queries', clearTip:'Clear log', exportTip:'Export log (.txt)',
+  settingsTitle:'Settings:', portNote:'ACM standard: 9-pin D-sub (RXD, TXD, GND), 9600 bps, 8 data bits, 1 stop bit, parity OFF, no handshake. 1:1 cable.',
+  limits:'Safety limits (steps)', limitsNote:'Every POS= command is clamped to this range. Per the manual, the actual range is ≈ 425 … 8000 depending on the limit switches.',
+  maint:'Maintenance', homeBtn:'⌂ HOME (to 50% reference position)',
+  homeNote:'Only use if the attenuator has lost its orientation. HOME runs automatically when the controller is switched on.',
+  cancel:'Cancel', save:'Save', protoTitle:'Command protocol',
+  protoNote:'<b>{v}</b> = value in steps, <b>{v4}</b> = value zero-padded to 4 digits (e.g. 0425). Shared by all attenuators.',
+  resetDef:'Restore defaults',
+  pf_eol:'Line terminator', pf_pollMs:'Fast polling (ms): STAT/POS/TRA', pf_slowPollMs:'Slow polling (ms): EGY/REF', pf_timeoutMs:'Max reply wait (ms)',
+  pf_statQ:'Status (BUSY/READY)', pf_posQ:'Position (steps)', pf_traQ:'Transmission (0.1% units)', pf_egyQ:'Average energy', pf_refQ:'Reference energy',
+  pf_aveQ:'Average count', pf_cycQ:'Integration time', pf_statrQ:'Loop control (TRUE/FALSE)', pf_posSet:'Set position', pf_home:'HOME',
+  demoPort:'(Demo — simulated)', choosePort:'— Select COM port —', portN:'Port {0}', noPerm:'(no permission)', addPort:'➕ Add new port…',
+  addTile:'Add attenuator', confirmDel:'Remove "{0}"?', autoToast:'Automatic mode is in development — requires energy measurement hardware.',
+  limitLbl:'limits {0} … {1}',
+  b_off:'OFFLINE', bs_off:'Not connected', b_sync:'SYNCING', bs_sync:'Reading status & position…', b_ready:'READY', bs_ready:'Control allowed',
+  b_busy:'BUSY', bs_busy:'Manual control not possible', b_noresp:'NO RESPONSE', bs_noresp:'Check cable / baud rate',
+  reached:'Position reached: {0}', dragSel:'⇕ Selected: {0} — release to send', moving:'➜ Moving to {0} …', arrived:'✔ Position reached: {0}',
+  w_noconn:'Device not connected.', w_busy:'Device is BUSY — manual control not possible.', w_notready:'Device not ready (waiting for READY).',
+  homeConfirm:'Send HOME to "{0}"?\nThe attenuator will move to the reference position (50% transmission).\nOnly use if orientation is lost.',
+  homeSent:'HOME sent', noRespStat:'Device not responding to STAT?', noPending:'(no pending command)',
+  badStat:'Invalid STAT? reply: {0}', badPos:'Invalid POS? reply: {0}', status:'Status: {0}', synced:'Position synced: {0} steps',
+  timeout30:'Not at {0} after 30 s (currently at {1})', t_noSerial:'This browser does not support Web Serial',
+  t_noPort:'No COM port selected, or permission not granted', t_openFail:'Cannot open port: {0}',
+  connected:'Connected {0} @ {1}', demoConn:'Demo: simulated device connected', disconnected:'Disconnected',
+  maxGtMin:'Max must be greater than Min', badXml:'Invalid XML file', downloaded:'{0} (downloaded)', unplugged:'COM cable unplugged',
+},
+vi:{
+  layout:'Bố cục', fullscreen:'Toàn màn hình', addDevice:'＋ Thêm thiết bị', demoTip:'Mô phỏng attenuator — không cần cổng COM', language:'Ngôn ngữ',
+  notSaved:'Chưa lưu cấu hình', protoTip:'Command giao tiếp', protocol:'⌨ Giao thức', openXml:'📂 Mở XML', saveXml:'💾 Lưu XML',
+  connAll:'🔌 Kết nối tất cả', discAll:'⏏ Ngắt tất cả',
+  noSerial:'⚠ Trình duyệt không hỗ trợ Web Serial — hãy mở bằng Chrome hoặc Edge. (Vẫn dùng được chế độ Demo.)',
+  nameTip:'Tên trạm (bấm để sửa)', settingsTip:'Cài đặt / Bảo trì', maxTip:'Phóng to / thu nhỏ', delTip:'Xóa thiết bị',
+  comPort:'Cổng COM', connect:'Kết nối', disconnect:'Ngắt',
+  curPos:'Vị trí hiện tại', trans:'Truyền qua', egy:'Năng lượng TB', ref:'Tham chiếu',
+  sliderTip:'Kéo để chọn vị trí — thả chuột để gửi lệnh', p_max:'Maximum', p_prod:'Sản xuất', p_align:'Chỉnh tia',
+  jogTip:'Tăng / giảm theo bước', step:'Bước', setPos:'Đặt vị trí', autoTip:'Cần phần cứng đo năng lượng', inDev:'Đang phát triển',
+  devinfoTip:'AVE? · CYC? · STATR? — bấm để đọc lại', logTip:'Ẩn / hiện log', cmdPh:'Lệnh tự do (Enter)', send:'Gửi',
+  pollTip:'Hiện các lệnh STAT?/POS?/TRA? tự động', clearTip:'Xóa log', exportTip:'Xuất log (.txt)',
+  settingsTitle:'Cài đặt:', portNote:'Chuẩn ACM: D-sub 9 chân (RXD, TXD, GND), 9600 bps, 8 data bits, 1 stop bit, parity OFF, không handshake. Cáp 1:1.',
+  limits:'Giới hạn an toàn (steps)', limitsNote:'Mọi lệnh POS= đều bị giới hạn trong khoảng này. Theo tài liệu, dải thực tế ≈ 425 … 8000 tùy công tắc hành trình.',
+  maint:'Bảo trì', homeBtn:'⌂ HOME (về vị trí tham chiếu 50%)',
+  homeNote:'Chỉ dùng khi attenuator bị mất định vị. Bình thường HOME tự chạy khi bật bộ điều khiển.',
+  cancel:'Hủy', save:'Lưu', protoTitle:'Giao thức command',
+  protoNote:'<b>{v}</b> = giá trị steps, <b>{v4}</b> = giá trị đệm đủ 4 chữ số (VD 0425). Dùng chung cho mọi attenuator.',
+  resetDef:'Khôi phục mặc định',
+  pf_eol:'Ký tự kết thúc', pf_pollMs:'Polling nhanh (ms): STAT/POS/TRA', pf_slowPollMs:'Polling chậm (ms): EGY/REF', pf_timeoutMs:'Chờ phản hồi tối đa (ms)',
+  pf_statQ:'Trạng thái (BUSY/READY)', pf_posQ:'Vị trí (steps)', pf_traQ:'Truyền qua (đơn vị 0.1%)', pf_egyQ:'Năng lượng trung bình', pf_refQ:'Năng lượng tham chiếu',
+  pf_aveQ:'Số lần lấy trung bình', pf_cycQ:'Thời gian tích phân', pf_statrQ:'Loop-control (TRUE/FALSE)', pf_posSet:'Đặt vị trí', pf_home:'HOME',
+  demoPort:'(Demo — mô phỏng)', choosePort:'— Chọn cổng COM —', portN:'Cổng {0}', noPerm:'(chưa cấp quyền)', addPort:'➕ Thêm cổng mới…',
+  addTile:'Thêm attenuator', confirmDel:'Xóa "{0}"?', autoToast:'Chế độ Automatic đang phát triển — cần phần cứng đo năng lượng.',
+  limitLbl:'giới hạn {0} … {1}',
+  b_off:'OFFLINE', bs_off:'Chưa kết nối', b_sync:'ĐANG ĐỒNG BỘ', bs_sync:'Đọc trạng thái & vị trí…', b_ready:'READY', bs_ready:'Cho phép điều khiển',
+  b_busy:'BUSY', bs_busy:'Không thể điều khiển thủ công', b_noresp:'KHÔNG PHẢN HỒI', bs_noresp:'Kiểm tra cáp / baud rate',
+  reached:'Đã đến vị trí {0}', dragSel:'⇕ Chọn: {0} — thả chuột để gửi', moving:'➜ Đang di chuyển tới {0} …', arrived:'✔ Đã đến vị trí {0}',
+  w_noconn:'Chưa kết nối thiết bị.', w_busy:'Thiết bị đang BUSY — không thể điều khiển thủ công.', w_notready:'Thiết bị chưa sẵn sàng (đang chờ READY).',
+  homeConfirm:'Gửi lệnh HOME tới "{0}"?\nAttenuator sẽ chạy về vị trí tham chiếu (50% truyền qua).\nChỉ dùng khi mất định vị.',
+  homeSent:'Đã gửi HOME', noRespStat:'Thiết bị không phản hồi STAT?', noPending:'(không có lệnh chờ)',
+  badStat:'STAT? trả về không hợp lệ: {0}', badPos:'POS? trả về không hợp lệ: {0}', status:'Trạng thái: {0}', synced:'Đồng bộ vị trí: {0} steps',
+  timeout30:'Quá 30 s chưa đến {0} (đang ở {1})', t_noSerial:'Trình duyệt không hỗ trợ Web Serial',
+  t_noPort:'Chưa chọn cổng COM hoặc cổng chưa được cấp quyền', t_openFail:'Không mở được cổng: {0}',
+  connected:'Kết nối {0} @ {1}', demoConn:'Demo: kết nối thiết bị mô phỏng', disconnected:'Đã ngắt kết nối',
+  maxGtMin:'Max phải lớn hơn Min', badXml:'File XML không hợp lệ', downloaded:'{0} (đã tải xuống)', unplugged:'Cáp COM đã bị rút',
+}};
+const LANGS=Object.keys(I18N);
+function t(k,...a){ const s=(I18N[state.lang]||I18N.en)[k]??I18N.en[k]??k; return s.replace(/\{(\d)\}/g,(_,i)=>a[i]??''); }
+function applyI18n(root){
+  root.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=t(e.dataset.i18n));
+  root.querySelectorAll('[data-i18n-html]').forEach(e=>e.innerHTML=t(e.dataset.i18nHtml));
+  root.querySelectorAll('[data-i18n-title]').forEach(e=>e.title=t(e.dataset.i18nTitle));
+  root.querySelectorAll('[data-i18n-ph]').forEach(e=>e.placeholder=t(e.dataset.i18nPh));
+}
+function setLang(l){
+  if(!I18N[l]) l='en';
+  state.lang=l; document.documentElement.lang=l;
+  render(); state.devices.forEach(d=>{renderPortSelect(d);renderScale(d);updateUI(d);});
+  if($('#protoModal').classList.contains('open')) openProto(Object.fromEntries([...$('#protoForm').querySelectorAll('input')].map(i=>[i.dataset.k,i.value])));
+  tick();
+}
+
 /* ======================= CONFIG ======================= */
 const PROTO_FIELDS=[
-  ['eol','Ký tự kết thúc','\\r'],
-  ['pollMs','Polling nhanh (ms): STAT/POS/TRA','500'],
-  ['slowPollMs','Polling chậm (ms): EGY/REF','2000'],
-  ['timeoutMs','Chờ phản hồi tối đa (ms)','400'],
-  ['statQ','Trạng thái (BUSY/READY)','STAT?'],
-  ['posQ','Vị trí (steps)','POS?'],
-  ['traQ','Truyền qua (đơn vị 0.1%)','TRA?'],
-  ['egyQ','Năng lượng trung bình','EGY?'],
-  ['refQ','Năng lượng tham chiếu','REF?'],
-  ['aveQ','Số lần lấy trung bình','AVE?'],
-  ['cycQ','Thời gian tích phân','CYC?'],
-  ['statrQ','Loop-control (TRUE/FALSE)','STATR?'],
-  ['posSet','Đặt vị trí','POS={v}'],
-  ['home','HOME','HOME'],
+  ['eol','pf_eol','\\r'],
+  ['pollMs','pf_pollMs','500'],
+  ['slowPollMs','pf_slowPollMs','2000'],
+  ['timeoutMs','pf_timeoutMs','400'],
+  ['statQ','pf_statQ','STAT?'],
+  ['posQ','pf_posQ','POS?'],
+  ['traQ','pf_traQ','TRA?'],
+  ['egyQ','pf_egyQ','EGY?'],
+  ['refQ','pf_refQ','REF?'],
+  ['aveQ','pf_aveQ','AVE?'],
+  ['cycQ','pf_cycQ','CYC?'],
+  ['statrQ','pf_statrQ','STATR?'],
+  ['posSet','pf_posSet','POS={v}'],
+  ['home','pf_home','HOME'],
 ];
-// key phản hồi ↔ field lệnh
+// reply key ↔ protocol command field
 const QKEYS={stat:'statQ',pos:'posQ',tra:'traQ',egy:'egyQ',ref:'refQ',ave:'aveQ',cyc:'cycQ',statr:'statrQ'};
 const defaultProto=()=>Object.fromEntries(PROTO_FIELDS.map(f=>[f[0],f[2]]));
-const PRESETS=[['max','Maximum',8000,'red'],['prod','Sản xuất',4000,'green'],['align','Chỉnh tia',1200,'blue']];
+const PRESETS=[['max','Maximum',8000,'red'],['prod','Production',4000,'green'],['align','Alignment',1200,'blue']];
 const STORE='attConsole.v4';
 
 const hasSerial='serial' in navigator;
 if(!hasSerial) document.getElementById('warn').style.display='block';
-const state={layout:'3',demo:false,proto:defaultProto(),devices:[],fileHandle:null};
+const state={lang:'en',layout:'3',demo:false,cfgLabel:null,proto:defaultProto(),devices:[],fileHandle:null};
 let grantedPorts=[], uid=1;
 const $=s=>document.querySelector(s);
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -382,31 +475,34 @@ function portKey(p){
 async function refreshPorts(){ if(hasSerial) grantedPorts=await navigator.serial.getPorts(); state.devices.forEach(renderPortSelect); }
 function renderPortSelect(d){
   const sel=d.el.querySelector('.port'); sel.innerHTML='';
-  sel.add(new Option(state.demo?'(Demo — mô phỏng)':'— Chọn cổng COM —',''));
+  sel.add(new Option(state.demo?t('demoPort'):t('choosePort'),''));
   grantedPorts.forEach((p,i)=>{
     const k=portKey(p), used=state.devices.find(x=>x!==d&&x.portKey===k&&x.connected);
-    const o=new Option(`Cổng ${i+1} [${k.replace('#0','')}]`+(used?' — '+used.name:''),k); o.disabled=!!used; sel.add(o);
+    const o=new Option(`${t('portN',i+1)} [${k.replace('#0','')}]`+(used?' — '+used.name:''),k); o.disabled=!!used; sel.add(o);
   });
-  if(d.portKey&&!grantedPorts.some(p=>portKey(p)===d.portKey)) sel.add(new Option('⚠ '+d.portKey+' (chưa cấp quyền)',d.portKey));
-  if(hasSerial) sel.add(new Option('➕ Thêm cổng mới…','__new'));
+  if(d.portKey&&!grantedPorts.some(p=>portKey(p)===d.portKey)) sel.add(new Option('⚠ '+d.portKey+' '+t('noPerm'),d.portKey));
+  if(hasSerial) sel.add(new Option(t('addPort'),'__new'));
   sel.value=d.portKey;
 }
 
 /* ======================= RENDER ======================= */
 const grid=$('#grid');
 function render(){
+  applyI18n(document); document.documentElement.lang=state.lang;
+  $('#cfgName').textContent=state.cfgLabel?'📄 '+state.cfgLabel:t('notSaved');
+  document.querySelectorAll('#langSeg button').forEach(b=>b.classList.toggle('active',b.dataset.lang===state.lang));
   grid.className='grid l'+state.layout;
   document.querySelectorAll('#layoutSeg button').forEach(b=>b.classList.toggle('active',b.dataset.l===state.layout));
   document.body.classList.toggle('demo',state.demo); $('#demoChk').checked=state.demo;
   grid.innerHTML='';
   state.devices.forEach((d,i)=>{ if(!d.el) buildDevice(d); d.el.querySelector('.no').textContent=String(i+1).padStart(2,'0'); grid.appendChild(d.el); });
   const add=document.createElement('button'); add.className='addtile';
-  add.innerHTML='<span class="plus">＋</span><span>Thêm attenuator</span>'; add.onclick=addDevice; grid.appendChild(add);
+  add.innerHTML='<span class="plus">＋</span><span></span>'; add.lastChild.textContent=t('addTile'); add.onclick=addDevice; grid.appendChild(add);
   persist();
 }
 
 function buildDevice(d){
-  const el=$('#tplDev').content.firstElementChild.cloneNode(true); d.el=el;
+  const el=$('#tplDev').content.firstElementChild.cloneNode(true); d.el=el; applyI18n(el);
   const q=s=>el.querySelector(s);
   q('.dname').value=d.name; q('.baud').value=d.baud; q('.stepw').value=d.step;
   el.classList.toggle('logclosed',!d.logOpen);
@@ -428,14 +524,14 @@ function buildDevice(d){
   q('.b-conn').onclick=()=>d.connected?disconnect(d):connect(d);
   q('.b-set').onclick=()=>openSettings(d);
   q('.b-max').onclick=()=>{const m=!el.classList.contains('max');state.devices.forEach(x=>x.el.classList.remove('max'));el.classList.toggle('max',m);grid.classList.toggle('has-max',m)};
-  q('.b-del').onclick=async()=>{ if(!confirm('Xóa "'+d.name+'"?'))return; if(d.connected) await disconnect(d); state.devices=state.devices.filter(x=>x!==d); grid.classList.remove('has-max'); render(); };
+  q('.b-del').onclick=async()=>{ if(!confirm(t('confirmDel',d.name)))return; if(d.connected) await disconnect(d); state.devices=state.devices.filter(x=>x!==d); grid.classList.remove('has-max'); render(); };
 
   q('.stepw').onchange=e=>{d.step=Math.max(1,Math.round(+e.target.value||1));e.target.value=d.step;persist()};
   q('.b-minus').onclick=()=>moveTo(d,(d.target??d.pos??d.minPos)-d.step);
   q('.b-plus').onclick=()=>moveTo(d,(d.target??d.pos??d.minPos)+d.step);
   const go=()=>{ const v=parseFloat(q('.setval').value); if(!isNaN(v)) moveTo(d,v); };
   q('.b-go').onclick=go; q('.setval').onkeydown=e=>{if(e.key==='Enter')go()};
-  q('.seg.mode button[data-m=auto]').onclick=()=>toast(d,'Chế độ Automatic đang phát triển — cần phần cứng đo năng lượng.');
+  q('.seg.mode button[data-m=auto]').onclick=()=>toast(d,t('autoToast'));
 
   // vertical slider
   const vs=q('.vs'), vin=q('.vin');
@@ -463,22 +559,18 @@ function renderScale(d){
     m.className='vmark'; l.className='vlab'; m.style.bottom=l.style.bottom=p+'%'; m.style.setProperty('--c',`var(--${c})`); l.style.setProperty('--c',`var(--${c})`);
     l.textContent=d.presets[k]; vin.insertBefore(m,vin.querySelector('.vneedle')); vin.appendChild(l);
   });
-  d.el.querySelector('.rng-lbl').textContent=`giới hạn ${d.minPos} … ${d.maxPos}`;
+  d.el.querySelector('.rng-lbl').textContent=t('limitLbl',d.minPos,d.maxPos);
   d.el.querySelectorAll('.pv').forEach(i=>{i.min=d.minPos;i.max=d.maxPos});
 }
 
 const canControl=d=>d.connected&&d.status==='ready';
 const BANNER={
-  off:['','OFFLINE','Chưa kết nối'],
-  sync:['sync','ĐANG ĐỒNG BỘ','Đọc trạng thái & vị trí…'],
-  ready:['ready','READY','Cho phép điều khiển'],
-  busy:['busy','BUSY','Không thể điều khiển thủ công'],
-  noresp:['err','KHÔNG PHẢN HỒI','Kiểm tra cáp / baud rate'],
+  off:[''], sync:['sync'], ready:['ready'], busy:['busy'], noresp:['err'],
 };
 function updateUI(d){
   const q=s=>d.el.querySelector(s), has=v=>v!=null&&!isNaN(v);
   // banner
-  const [cls,txt,sub]=BANNER[d.connected?d.status:'off'];
+  const st=d.connected?d.status:'off', [cls]=BANNER[st], txt=t('b_'+st), sub=t('bs_'+st);
   q('.banner').className='banner '+cls; q('.btxt').textContent=txt; q('.bsub').textContent=(d.connected&&state.demo&&!d.port?'Demo · ':'')+sub;
   // position
   q('.v-pos').textContent=has(d.pos)?d.pos:'—';
@@ -487,9 +579,9 @@ function updateUI(d){
   q('.v-ref').textContent=d.ref??'—';
   q('.devinfo').innerHTML=`AVE ${d.ave??'—'} · CYC ${d.cyc??'—'} · Loop <span class="${d.loop?'on':''}">${d.loop==null?'—':d.loop?'ON':'OFF'}</span>`;
   const a=q('.arrive');
-  if(d.drag!=null){ a.className='arrive mov'; a.textContent='⇕ Chọn: '+d.drag+' — thả chuột để gửi'; }
-  else if(has(d.target)){ a.className='arrive mov'; a.textContent='➜ Đang di chuyển tới '+d.target+' …'; }
-  else if(d.arrived&&has(d.pos)){ a.className='arrive ok'; a.textContent='✔ Đã đến vị trí '+d.pos; }
+  if(d.drag!=null){ a.className='arrive mov'; a.textContent=t('dragSel',d.drag); }
+  else if(has(d.target)){ a.className='arrive mov'; a.textContent=t('moving',d.target); }
+  else if(d.arrived&&has(d.pos)){ a.className='arrive ok'; a.textContent=t('arrived',d.pos); }
   else a.textContent='', a.className='arrive';
   // slider
   q('.vfill').style.height=(has(d.pos)?pct(d,d.pos):0)+'%';
@@ -506,11 +598,11 @@ function updateUI(d){
   const en=canControl(d);
   d.el.querySelectorAll('.side button').forEach(b=>b.disabled=!en);
   // connect button
-  const b=q('.b-conn'); b.textContent=d.connected?'Ngắt':'Kết nối'; b.classList.toggle('primary',!d.connected); b.classList.toggle('danger',d.connected);
+  const b=q('.b-conn'); b.textContent=d.connected?t('disconnect'):t('connect'); b.classList.toggle('primary',!d.connected); b.classList.toggle('danger',d.connected);
   d.el.classList.toggle('on',d.connected);
 }
-function toast(d,msg){ const t=d.el.querySelector('.toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2500); }
-function toastWhy(d){ toast(d, !d.connected?'Chưa kết nối thiết bị.':d.status==='busy'?'Thiết bị đang BUSY — không thể điều khiển thủ công.':'Thiết bị chưa sẵn sàng (đang chờ READY).'); }
+function toast(d,msg){ const tb=d.el.querySelector('.toast'); tb.textContent=msg; tb.classList.add('show'); clearTimeout(tb._h); tb._h=setTimeout(()=>tb.classList.remove('show'),2500); }
+function toastWhy(d){ toast(d, t(!d.connected?'w_noconn':d.status==='busy'?'w_busy':'w_notready')); }
 
 /* ======================= ACTIONS ======================= */
 function fillCmd(tpl,v){ return tpl.replace(/\{v4\}/g,String(v).padStart(4,'0')).replace(/\{v\}/g,v); }
@@ -525,15 +617,15 @@ const query=(d,key,quiet)=>enqueue(d,state.proto[QKEYS[key]],{key,quiet});
 const keyOf=t=>Object.keys(QKEYS).find(k=>state.proto[QKEYS[k]]===t);
 function home(d){
   if(!canControl(d)) return toastWhy(d);
-  if(!confirm('Gửi lệnh HOME tới "'+d.name+'"?\nAttenuator sẽ chạy về vị trí tham chiếu (50% truyền qua).\nChỉ dùng khi mất định vị.')) return;
-  d.target=null; d.arrived=false; enqueue(d,state.proto.home,{front:true,noReply:true}); log(d,'sys','Đã gửi HOME');
+  if(!confirm(t('homeConfirm',d.name))) return;
+  d.target=null; d.arrived=false; enqueue(d,state.proto.home,{front:true,noReply:true}); log(d,'sys',t('homeSent'));
 }
 
 /* ======================= LOG ======================= */
 function log(d,type,text){
   const L=d.el.querySelector('.log'), ln=document.createElement('div'); ln.className='ln '+type;
-  const now=new Date(), t=now.toTimeString().slice(0,8)+'.'+String(now.getMilliseconds()).padStart(3,'0');
-  ln.innerHTML=`<span class="t">${t}</span><span class="d">${{tx:'TX',rx:'RX',sys:'••',err:'!!',ok:'✔'}[type]}</span><span class="m"></span>`;
+  const now=new Date(), ts=now.toTimeString().slice(0,8)+'.'+String(now.getMilliseconds()).padStart(3,'0');
+  ln.innerHTML=`<span class="t">${ts}</span><span class="d">${{tx:'TX',rx:'RX',sys:'••',err:'!!',ok:'✔'}[type]}</span><span class="m"></span>`;
   ln.querySelector('.m').textContent=text; L.appendChild(ln);
   if(L.childElementCount>3000) L.firstChild.remove();
   L.scrollTop=L.scrollHeight;
@@ -541,8 +633,8 @@ function log(d,type,text){
 const vis=s=>s.replace(/\r/g,'<CR>').replace(/\n/g,'<LF>');
 
 /* ======================= COMMAND QUEUE =======================
-   Giao tiếp simplex, phản hồi KHÔNG có tiền tố (VD "POS?" → "2400").
-   → Mỗi lúc chỉ 1 lệnh: gửi → chờ 1 dòng phản hồi (hoặc timeout) → gán phản hồi cho đúng lệnh đó. */
+   Simplex link, replies carry NO prefix (e.g. "POS?" → "2400").
+   → One command at a time: send → wait for one reply line (or timeout) → assign the reply to that command. */
 function enqueue(d,text,opt={}){
   if(!d.connected||!text) return;
   const item={text,...opt}; opt.front?d.q.unshift(item):d.q.push(item); pump(d);
@@ -553,14 +645,14 @@ async function pump(d){
   const show=!it.quiet||d.el.querySelector('.showpoll').checked;
   if(show) log(d,'tx',vis(it.text+unEsc(state.proto.eol)));
   let line=null;
-  if(it.noReply){ await writeText(d,it.text); await new Promise(r=>setTimeout(r,30)); }   // POS= / HOME: thiết bị không phản hồi
+  if(it.noReply){ await writeText(d,it.text); await new Promise(r=>setTimeout(r,30)); }   // POS= / HOME: device sends no reply
   else {
     const wait=new Promise(res=>{ d.waiter=res; setTimeout(()=>res(null),+state.proto.timeoutMs||400); });
     await writeText(d,it.text); line=await wait; d.waiter=null;
   }
   if(line!=null){ if(show) log(d,'rx',line); applyResponse(d,it.key,line); }
-  else if(it.key==='stat'){ if(++d.miss>=3&&d.status!=='noresp'){ d.status='noresp'; log(d,'err','Thiết bị không phản hồi STAT?'); updateUI(d);} }
-  await new Promise(r=>setTimeout(r,15));   // khoảng nghỉ ngắn giữa 2 lệnh
+  else if(it.key==='stat'){ if(++d.miss>=3&&d.status!=='noresp'){ d.status='noresp'; log(d,'err',t('noRespStat')); updateUI(d);} }
+  await new Promise(r=>setTimeout(r,15));   // short gap between commands
   d.qBusy=false; pump(d);
 }
 async function writeText(d,text){
@@ -570,7 +662,7 @@ async function writeText(d,text){
 }
 function handleLine(d,line){
   if(d.waiter) d.waiter(line);
-  else log(d,'rx',line+'   (không có lệnh chờ)');
+  else log(d,'rx',line+'   '+t('noPending'));
 }
 function applyResponse(d,key,line){
   const n=parseFloat(line), num=/^-?\d+(\.\d+)?$/.test(line);
@@ -578,10 +670,10 @@ function applyResponse(d,key,line){
     case 'stat':
       if(/^READY$/i.test(line)) setStatus(d,'ready');
       else if(/^BUSY$/i.test(line)) setStatus(d,'busy');
-      else log(d,'err','STAT? trả về không hợp lệ: '+line);
+      else log(d,'err',t('badStat',line));
       break;
-    case 'pos': if(num) setPos(d,Math.round(n)); else log(d,'err','POS? trả về không hợp lệ: '+line); break;
-    case 'tra': if(num) d.tra=n/10; break;            // đơn vị 0.1 %
+    case 'pos': if(num) setPos(d,Math.round(n)); else log(d,'err',t('badPos',line)); break;
+    case 'tra': if(num) d.tra=n/10; break;            // unit: 0.1 %
     case 'egy': d.egy=line; break;
     case 'ref': d.ref=line; break;
     case 'ave': d.ave=line; break;
@@ -592,13 +684,13 @@ function applyResponse(d,key,line){
 }
 function setStatus(d,s){
   d.miss=0;
-  if(d.status!==s){ if(d.status!=='sync'||s==='busy') log(d,s==='ready'?'ok':'err','Trạng thái: '+s.toUpperCase()); d.status=s; updateUI(d); }
+  if(d.status!==s){ if(d.status!=='sync'||s==='busy') log(d,s==='ready'?'ok':'err',t('status',s.toUpperCase())); d.status=s; updateUI(d); }
 }
 function setPos(d,p){
   const first=d.pos==null; d.pos=p;
-  if(first) log(d,'sys','Đồng bộ vị trí: '+p+' steps');
-  if(d.target!=null&&p===d.target){ d.target=null; d.arrived=true; log(d,'ok','Đã đến vị trí '+p); }
-  else if(d.target!=null&&Date.now()-d.moveStart>30000){ log(d,'err',`Quá 30 s chưa đến ${d.target} (đang ở ${p})`); d.target=null; }
+  if(first) log(d,'sys',t('synced',p));
+  if(d.target!=null&&p===d.target){ d.target=null; d.arrived=true; log(d,'ok',t('reached',p)); }
+  else if(d.target!=null&&Date.now()-d.moveStart>30000){ log(d,'err',t('timeout30',d.target,p)); d.target=null; }
   updateUI(d);
 }
 
@@ -606,17 +698,17 @@ function setPos(d,p){
 const isDemo=d=>state.demo&&!d.port;
 async function connect(d){
   if(!(state.demo&&!d.portKey)){
-    if(!hasSerial) return toast(d,'Trình duyệt không hỗ trợ Web Serial');
+    if(!hasSerial) return toast(d,t('t_noSerial'));
     const port=grantedPorts.find(p=>portKey(p)===d.portKey);
-    if(!port) return toast(d,'Chưa chọn cổng COM hoặc cổng chưa được cấp quyền');
+    if(!port) return toast(d,t('t_noPort'));
     try{ await port.open({baudRate:d.baud,dataBits:d.dataBits,stopBits:d.stopBits,parity:d.parity,flowControl:d.flow}); }
-    catch(e){ log(d,'err',e.message); return toast(d,'Không mở được cổng: '+e.message); }
+    catch(e){ log(d,'err',e.message); return toast(d,t('t_openFail',e.message)); }
     d.port=port; readLoop(d);
   } else { d.sim={pos:d.sim?.pos??4000,target:null}; }
   Object.assign(d,{connected:true,status:'sync',pos:null,target:null,arrived:false,miss:0,q:[],qBusy:false,tra:null,egy:null,ref:null,ave:null,cyc:null,loop:null});
-  log(d,'sys',d.port?`Kết nối ${d.portKey} @ ${d.baud}`:'Demo: kết nối thiết bị mô phỏng');
+  log(d,'sys',d.port?t('connected',d.portKey,d.baud):t('demoConn'));
   state.devices.forEach(renderPortSelect); updateUI(d);
-  // Đồng bộ ban đầu: trạng thái, vị trí (→ thanh kéo), truyền qua, năng lượng, thông số
+  // Initial sync: status, position (→ slider), transmission, energy, parameters
   ['stat','pos','tra','egy','ref','ave','cyc','statr'].forEach(k=>query(d,k));
   clearInterval(d._poll); clearInterval(d._slow);
   d._poll=setInterval(()=>{ if(d.connected&&d.q.length===0) ['stat','pos','tra'].forEach(k=>query(d,k,true)); },Math.max(150,+state.proto.pollMs||500));
@@ -640,7 +732,7 @@ async function readLoop(d){
 async function disconnect(d){
   d.connected=false; clearInterval(d._poll); clearInterval(d._slow); clearInterval(d._sim); d.q=[]; d.waiter?.(null);
   try{ if(d.reader) await d.reader.cancel(); await d.port?.close(); }catch(e){}
-  d.port=null; d.target=null; d.status='off'; log(d,'sys','Đã ngắt kết nối'); state.devices.forEach(renderPortSelect); updateUI(d);
+  d.port=null; d.target=null; d.status='off'; log(d,'sys',t('disconnected')); state.devices.forEach(renderPortSelect); updateUI(d);
 }
 
 /* ======================= DEMO SIMULATOR ======================= */
@@ -660,9 +752,9 @@ function simulate(d,text){
   const startMove=t=>{ S.target=t; clearInterval(d._sim); d._sim=setInterval(()=>{ const df=S.target-S.pos; if(!df){clearInterval(d._sim);S.target=null;return;} S.pos+=Math.sign(df)*Math.min(Math.abs(df),45); },30); };
   const tplRe=new RegExp('^'+P.posSet.replace(/[.*+?^$()|[\]\\]/g,'\\$&').replace(/\\?\{v4?\\?\}/,'(\\d+)')+'$');
   const m=tplRe.exec(text);
-  if(m) return startMove(parseInt(m[1],10));     // POS= không phản hồi (giả định)
+  if(m) return startMove(parseInt(m[1],10));     // POS= sends no reply
   if(text===P.home) return startMove(4200);
-  // lệnh lạ: thiết bị bỏ qua (error-tolerant)
+  // unknown command: ignored by the device (error-tolerant)
 }
 
 /* ======================= SETTINGS ======================= */
@@ -679,14 +771,14 @@ $('#setOk').onclick=()=>{
   const d=setDev;
   d.dataBits=+$('#s_dataBits').value; d.parity=$('#s_parity').value; d.stopBits=+$('#s_stopBits').value; d.flow=$('#s_flow').value;
   const mn=Math.round(+$('#s_min').value), mx=Math.round(+$('#s_max').value);
-  if(!(mx>mn)) return alert('Max phải lớn hơn Min');
+  if(!(mx>mn)) return alert(t('maxGtMin'));
   d.minPos=mn; d.maxPos=mx; for(const k in d.presets){ d.presets[k]=clamp(d.presets[k],mn,mx); d.el.querySelector(`.preset[data-k=${k}] .pv`).value=d.presets[k]; }
   renderScale(d); updateUI(d); persist(); $('#setModal').classList.remove('open');
 };
 
 /* ======================= PROTOCOL ======================= */
 function openProto(vals=state.proto){
-  $('#protoForm').innerHTML=PROTO_FIELDS.map(([k,l])=>`<label>${l}</label><input type="text" data-k="${k}">`).join('');
+  $('#protoForm').innerHTML=PROTO_FIELDS.map(([k,l])=>`<label>${t(l)}</label><input type="text" data-k="${k}">`).join('');
   $('#protoForm').querySelectorAll('input').forEach(i=>i.value=vals[i.dataset.k]??'');
   $('#protoModal').classList.add('open');
 }
@@ -699,7 +791,7 @@ $('#protoOk').onclick=()=>{ $('#protoForm').querySelectorAll('input').forEach(i=
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const TAG=k=>k[0].toUpperCase()+k.slice(1);
 function toXML(){
-  let x=`<?xml version="1.0" encoding="UTF-8"?>\n<AttenuatorConsoleConfig version="4" layout="${state.layout}" saved="${new Date().toISOString()}">\n  <Protocol>\n`;
+  let x=`<?xml version="1.0" encoding="UTF-8"?>\n<AttenuatorConsoleConfig version="5" language="${state.lang}" layout="${state.layout}" saved="${new Date().toISOString()}">\n  <Protocol>\n`;
   PROTO_FIELDS.forEach(([k])=>x+=`    <${TAG(k)}>${esc(state.proto[k])}</${TAG(k)}>\n`);
   x+=`  </Protocol>\n`;
   state.devices.forEach(d=>{
@@ -711,9 +803,10 @@ function toXML(){
 }
 function fromXML(txt){
   const doc=new DOMParser().parseFromString(txt,'application/xml');
-  if(doc.querySelector('parsererror')) throw Error('File XML không hợp lệ');
+  if(doc.querySelector('parsererror')) throw Error(t('badXml'));
   const r=doc.documentElement, A=(n,a,def)=>n?.getAttribute(a)??def;
   state.devices.filter(d=>d.connected).forEach(disconnect);
+  state.lang=I18N[A(r,'language','en')]?A(r,'language','en'):'en';
   state.layout=A(r,'layout','3');
   state.proto=defaultProto();
   const pr=r.querySelector('Protocol'); if(pr) PROTO_FIELDS.forEach(([k])=>{const n=pr.querySelector(TAG(k)); if(n) state.proto[k]=n.textContent;});
@@ -737,7 +830,7 @@ async function saveXML(){
       setCfgName(state.fileHandle.name+' ✓ '+new Date().toLocaleTimeString()); return;
     }catch(e){ if(e.name==='AbortError') return; }
   }
-  download('attenuator_config.xml',xml,'application/xml'); setCfgName('attenuator_config.xml (đã tải xuống)');
+  download('attenuator_config.xml',xml,'application/xml'); setCfgName(t('downloaded','attenuator_config.xml'));
 }
 async function openXML(){
   if(window.showOpenFilePicker){
@@ -746,13 +839,14 @@ async function openXML(){
   } else $('#fileIn').click();
 }
 $('#fileIn').onchange=async e=>{ const f=e.target.files[0]; if(!f)return; try{fromXML(await f.text());setCfgName(f.name);await refreshPorts();}catch(err){alert(err.message)} e.target.value=''; };
-function setCfgName(n){ $('#cfgName').textContent='📄 '+n; }
+function setCfgName(n){ state.cfgLabel=n; $('#cfgName').textContent='📄 '+n; }
 function persist(){ try{ localStorage.setItem(STORE,toXML()); localStorage.setItem(STORE+'.demo',state.demo?'1':''); }catch(e){} }
 
 /* ======================= TOP BAR ======================= */
 function addDevice(){ state.devices.push(newDevice()); render(); const d=state.devices.at(-1); d.el.scrollIntoView({behavior:'smooth'}); d.el.querySelector('.dname').select(); }
 $('#btnAdd').onclick=addDevice;
 document.querySelectorAll('#layoutSeg button').forEach(b=>b.onclick=()=>{state.layout=b.dataset.l;grid.classList.remove('has-max');state.devices.forEach(d=>d.el.classList.remove('max'));render();});
+document.querySelectorAll('#langSeg button').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
 $('#btnSave').onclick=saveXML; $('#btnOpen').onclick=openXML;
 $('#btnConnAll').onclick=()=>state.devices.filter(d=>!d.connected&&(d.portKey||state.demo)).forEach(connect);
 $('#btnDiscAll').onclick=()=>state.devices.filter(d=>d.connected).forEach(disconnect);
@@ -760,9 +854,10 @@ $('#demoChk').onchange=e=>{ state.demo=e.target.checked; state.devices.filter(d=
 document.addEventListener('keydown',e=>{ if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveXML();} if(e.key==='Escape') document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open')); });
 if(hasSerial){
   navigator.serial.addEventListener('connect',refreshPorts);
-  navigator.serial.addEventListener('disconnect',e=>{ state.devices.filter(d=>d.port===e.target).forEach(d=>{log(d,'err','Cáp COM đã bị rút');disconnect(d)}); refreshPorts(); });
+  navigator.serial.addEventListener('disconnect',e=>{ state.devices.filter(d=>d.port===e.target).forEach(d=>{log(d,'err',t('unplugged'));disconnect(d)}); refreshPorts(); });
 }
-setInterval(()=>$('#clock').textContent=new Date().toLocaleTimeString('vi-VN'),1000);
+function tick(){ $('#clock').textContent=new Date().toLocaleTimeString(state.lang==='vi'?'vi-VN':'en-GB'); }
+setInterval(tick,1000); tick();
 
 /* ======================= INIT ======================= */
 (async()=>{

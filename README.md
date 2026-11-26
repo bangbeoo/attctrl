@@ -2,6 +2,8 @@
 
 Web app chạy local (một file HTML duy nhất) để điều khiển nhiều **Attenuator Control Module (ACM)** qua cổng COM, mỗi cổng COM một thiết bị.
 
+Giao diện song ngữ **English (mặc định) / Tiếng Việt**: chuyển bằng nút **EN | VI** trên thanh trên cùng.
+
 ## Yêu cầu
 - **Google Chrome** hoặc **Microsoft Edge** (phiên bản 89 trở lên), vì app dùng Web Serial API. Firefox/Safari không hỗ trợ.
 - Cáp serial 1:1, D-sub 9 chân (RXD, TXD, GND), hoặc bộ chuyển USB–RS232.
@@ -9,11 +11,12 @@ Web app chạy local (một file HTML duy nhất) để điều khiển nhiều 
 ## Chạy
 Nhấp đúp `index.html` để mở bằng Chrome/Edge. Không cần cài đặt hay chạy server.
 
-Lần đầu trên mỗi máy, ở ô **Cổng** của từng thiết bị chọn **"➕ Thêm cổng mới…"** rồi chọn đúng COMx trong hộp thoại của trình duyệt. Trình duyệt sẽ nhớ quyền truy cập cho những lần sau.
+Lần đầu trên mỗi máy, ở ô **COM port** của từng thiết bị chọn **"➕ Add new port…"** (VI: "➕ Thêm cổng mới…") rồi chọn đúng COMx trong hộp thoại của trình duyệt. Trình duyệt sẽ nhớ quyền truy cập cho những lần sau.
 
 > Web Serial không cho trang web đọc tên `COMx`, nên app nhận diện cổng bằng USB VID:PID và số thứ tự (ví dụ `0403:6001#0`). Tên COM thật chỉ hiện trong hộp thoại chọn cổng.
 
 ## Giao diện
+- **Ngôn ngữ:** EN | VI. Mặc định là English; lựa chọn được lưu vào file XML.
 - **Bố cục:** Toàn màn hình / 1/2 / **1/3 (mặc định, 3 trạm)** / 1/4. Nút ⛶ phóng to tạm một trạm.
 - **＋ Thêm thiết bị:** thêm trạm, số lượng tùy ý.
 - **Mỗi trạm có:**
@@ -21,7 +24,7 @@ Lần đầu trên mỗi máy, ở ô **Cổng** của từng thiết bị chọ
   - Vị trí hiện tại kèm thông báo "Đã đến vị trí".
   - Truyền qua (%), năng lượng trung bình, năng lượng tham chiếu.
   - Thanh kéo dọc: thả chuột mới gửi lệnh.
-  - Nút vị trí đặt sẵn: 🔴 **MAXIMUM** (nhấp nháy khi ở vị trí), 🟢 **SẢN XUẤT** (nhấp nháy khi ở vị trí), 🔵 **CHỈNH TIA** (sáng liền khi ở vị trí). Mỗi nút có ô nhập steps.
+  - Nút vị trí đặt sẵn: 🔴 **MAXIMUM** (nhấp nháy khi ở vị trí), 🟢 **PRODUCTION / SẢN XUẤT** (nhấp nháy khi ở vị trí), 🔵 **ALIGNMENT / CHỈNH TIA** (sáng liền khi ở vị trí). Mỗi nút có ô nhập steps.
   - Nút − / + theo bước, ô nhập vị trí + GO.
   - Log TX/RX, ô gửi lệnh tự do, xuất log ra file .txt.
 - **⚙ (mỗi trạm):** thông số cổng, giới hạn an toàn min/max (mặc định 425…8000), lệnh **HOME** (bảo trì, có hỏi xác nhận trước khi gửi).
@@ -48,6 +51,6 @@ Vì phản hồi không có tiền tố, app gửi **từng lệnh một**: gử
 "Đã đến vị trí" được xác định khi `POS?` đọc lại đúng bằng giá trị đã gửi bằng `POS=`. Nếu sau 30 s vẫn chưa đến, app ghi cảnh báo vào log.
 
 ## Cấu hình (XML)
-- **💾 Lưu XML** / **📂 Mở XML** (Ctrl+S để lưu nhanh). App cũng tự lưu cấu hình gần nhất trong trình duyệt.
-- File cấu hình chứa: bố cục, giao thức, danh sách trạm (tên, cổng, thông số cổng, giới hạn, bước, các vị trí đặt sẵn).
+- **💾 Save XML** / **📂 Open XML** (Ctrl+S để lưu nhanh). App cũng tự lưu cấu hình gần nhất trong trình duyệt.
+- File cấu hình chứa: ngôn ngữ (`language="en"` hoặc `"vi"`), bố cục, giao thức, danh sách trạm (tên, cổng, thông số cổng, giới hạn, bước, các vị trí đặt sẵn).
 - File mẫu: [`config.example.xml`](config.example.xml).
