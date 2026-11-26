@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attenuator Console</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#141a21; --panel2:#1a2129; --line:#27313c; --field:#0a0e13;
+  --text:#e3e9f0; --muted:#7f8c9b; --accent:#3aa0ff;
+  --blue:#3aa0ff; --green:#22d36b; --red:#ff4d4d; --amber:#f5b83d; --grey:#5b6673;
+  --mono: ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:13px/1.35 "Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer;transition:border-color .15s,background .15s}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{border-color:#5a2a2a;color:var(--red)}
+button.icon{padding:3px 7px;min-width:28px}
+select,input[type=text],input[type=number]{background:var(--field);border:1px solid var(--line);border-radius:7px;padding:4px 6px}
+input[type=number]{font-family:var(--mono);text-align:right;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+.spacer{flex:1}
+
+/* ===== Top bar ===== */
+.topbar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{font-weight:700;margin-right:6px;letter-spacing:.3px}
+.brand small{color:var(--muted);font-weight:400;margin-left:4px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--field)}
+.seg button{border:0;border-radius:0;background:transparent;display:flex;align-items:center;gap:6px;padding:5px 10px}
+.seg button.active{background:var(--accent);color:#fff}
+.seg svg{width:18px;height:12px}
+.cfgname{color:var(--muted);font-size:12px}
+.toggle{display:flex;align-items:center;gap:6px;color:var(--muted);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--amber)}
+body.demo .toggle{color:var(--amber)}
+.clock{font-family:var(--mono);color:var(--muted);font-size:12px}
+.warnbar{background:#3a2f0b;color:var(--amber);padding:5px 12px;font-size:12px;display:none}
+
+/* ===== Grid of stations ===== */
+.grid{flex:1;overflow:auto;display:grid;gap:8px;padding:8px;grid-auto-rows:calc(100vh - 62px)}
+.grid.l1{grid-template-columns:1fr}
+.grid.l2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.l3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.l4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid.has-max{grid-template-columns:1fr!important}
+.grid.has-max>:not(.max){display:none}
+@media (max-width:1100px){.grid.l3,.grid.l4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.grid{grid-template-columns:1fr!important}}
+
+/* ===== Station panel ===== */
+.dev{container-type:size;position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.dhead{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.no{font-family:var(--mono);font-weight:700;font-size:15px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:1px 7px;color:var(--muted)}
+.dname{background:transparent;border:1px solid transparent!important;font-weight:700;font-size:15px;min-width:0;flex:1;padding:2px 4px;letter-spacing:.3px}
+.dname:hover,.dname:focus{border-color:var(--line)!important;background:var(--field)}
+.connrow{display:flex;gap:6px;padding:7px 10px;border-bottom:1px solid var(--line);align-items:center}
+.connrow .port{flex:1;min-width:0}
+.connrow .baud{width:86px}
+.connrow .b-conn{min-width:84px}
+.dev.on .connrow select{opacity:.55;pointer-events:none}
+
+.dbody{flex:1;min-height:0;display:grid;gap:8px;padding:8px 10px;
+  grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) auto auto;
+  grid-template-areas:"info" "ctrl" "foot" "log"}
+.info{grid-area:info;display:flex;flex-direction:column;gap:8px}
+.ctrl{grid-area:ctrl;display:flex;gap:10px;min-height:0}
+.foot{grid-area:foot;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.logbox{grid-area:log;display:flex;flex-direction:column;height:128px;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.dev.logclosed .logbox{display:none}
+@container (min-width:1000px){
+  .dbody{grid-template-columns:minmax(380px,1fr) 1.2fr;grid-template-rows:auto auto minmax(0,1fr);
+    grid-template-areas:"info ctrl" "foot ctrl" "log ctrl"}
+  .logbox{height:auto}
+  .dev.logclosed .logbox{display:flex}
+}
+
+/* status banner */
+.banner{border-radius:9px;padding:8px 12px;font-weight:700;letter-spacing:.6px;display:flex;align-items:center;gap:10px;background:#20262e;color:var(--muted);border:1px solid var(--line)}
+.banner .bdot{width:12px;height:12px;border-radius:50%;background:currentColor;flex:none}
+.banner .bsub{font-weight:400;letter-spacing:0;font-size:12px;opacity:.85;margin-left:auto;text-align:right}
+.banner.ready{background:#0f2a1b;color:var(--green);border-color:#1e5a37}
+.banner.ready .bdot{box-shadow:0 0 10px var(--green)}
+.banner.busy{background:#2e2410;color:var(--amber);border-color:#6a5220}
+.banner.busy .bdot{animation:pulse 1s infinite}
+.banner.sync{background:#0f2238;color:var(--blue);border-color:#1f4a78}
+.banner.err{background:#2e1414;color:var(--red);border-color:#6a2626}
+@keyframes pulse{50%{opacity:.25}}
+
+/* position readout */
+.posbox{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column}
+.posbox .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:flex;justify-content:space-between}
+.big{font-family:var(--mono);font-weight:700;font-size:clamp(34px,13cqw,72px);line-height:1.05;color:#fff;letter-spacing:1px}
+.big small{font-size:.28em;color:var(--muted);font-weight:400;margin-left:6px;letter-spacing:0}
+.arrive{font-size:13px;font-weight:600;min-height:20px;display:flex;align-items:center;gap:6px}
+.arrive.ok{color:var(--green)}
+.arrive.mov{color:var(--amber)}
+.arrive.warn{color:var(--red)}
+
+/* vertical slider */
+.vs{position:relative;width:124px;flex:none;user-select:none;touch-action:none;cursor:ns-resize;background:var(--field);border:1px solid var(--line);border-radius:10px}
+.vs.dis{cursor:not-allowed;opacity:.65}
+.vin{position:absolute;top:18px;bottom:18px;left:0;right:0}
+.vt{position:absolute;left:58px;width:14px;top:0;bottom:0;border-radius:7px;background:#26303b;overflow:hidden}
+.vfill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,#174f86,#3aa0ff);transition:height .1s linear}
+.vmark{position:absolute;left:52px;width:26px;height:3px;margin-bottom:-1.5px;background:var(--c);border-radius:2px}
+.vlab{position:absolute;left:2px;width:38px;text-align:right;font:600 11px var(--mono);color:var(--c);transform:translateY(50%)}
+.vscale{position:absolute;left:80px;white-space:nowrap;font:10px var(--mono);color:var(--muted);transform:translateY(50%)}
+.vscale::before{content:"";display:inline-block;width:6px;height:1px;background:var(--muted);vertical-align:middle;margin-right:3px}
+.vneedle{position:absolute;left:44px;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid #fff;margin-bottom:-7px;transition:bottom .1s linear}
+.vthumb{position:absolute;left:65px;width:40px;height:20px;margin:0 0 -10px -20px;border-radius:6px;background:var(--panel);border:3px solid var(--accent);box-shadow:0 2px 8px #000a}
+.vs.dis .vthumb{border-color:var(--grey)}
+
+/* side controls */
+.side{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.preset{flex:1;max-height:84px;min-height:46px;display:flex;align-items:stretch;border:2px solid var(--c);border-radius:11px;overflow:hidden;background:color-mix(in srgb,var(--c) 10%,transparent)}
+.pbtn{flex:1;border:0;border-radius:0;background:transparent;color:var(--c);font-weight:800;display:flex;align-items:center;gap:9px;padding:6px 12px;min-width:0;text-transform:uppercase;letter-spacing:.6px;font-size:clamp(13px,3.3cqw,18px);text-align:left}
+.pbtn:hover:not(:disabled){background:color-mix(in srgb,var(--c) 24%,transparent)}
+.pbtn .dot{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
+.pin{display:flex;flex-direction:column;justify-content:center;background:var(--field);border-left:1px solid color-mix(in srgb,var(--c) 40%,transparent);padding:0 6px}
+.pin input{width:66px;border:0;background:transparent;font-size:15px;padding:2px}
+.pin span{font-size:9.5px;color:var(--muted);text-align:right;text-transform:uppercase}
+.preset.on{background:var(--c)} .preset.on .pbtn{color:#000} .preset.on .dot{background:#000}
+.preset.go{border-style:dashed}
+.preset.blink{animation:blink .9s steps(1) infinite}
+.preset.blink .pbtn{animation:blinkTxt .9s steps(1) infinite}
+.preset.blink .dot{animation:blinkDot .9s steps(1) infinite}
+@keyframes blink{0%{background:var(--c);box-shadow:0 0 22px var(--c)}50%{background:color-mix(in srgb,var(--c) 10%,transparent);box-shadow:none}}
+@keyframes blinkTxt{0%{color:#000}50%{color:var(--c)}}
+@keyframes blinkDot{0%{background:#000}50%{background:var(--c)}}
+
+.grp{display:flex;align-items:center;gap:5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:5px}
+.grp .gl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:0 3px;white-space:nowrap}
+.jog{font-size:22px;font-weight:700;flex:1;padding:4px 0;line-height:1}
+.grp input{width:70px;flex:none}
+.grp .setval{flex:1;min-width:60px;width:auto;font-size:15px}
+.b-go{min-width:56px;font-weight:700}
+
+.foot .auto{opacity:.6}
+.minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.mini{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:4px 9px;min-width:0}
+.mini .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .mv{font:600 clamp(15px,4.4cqw,24px) var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini .mv small{font-size:.55em;color:var(--muted);margin-left:3px}
+.devinfo{font:11px var(--mono);color:var(--muted);cursor:pointer;white-space:nowrap}
+.devinfo .on{color:var(--green)}
+@container (max-width:640px){.foot .badge{display:none}}
+@container (max-width:500px){
+  .vs{width:104px}.vt{left:50px}.vmark{left:44px}.vneedle{left:37px}.vthumb{left:57px;width:34px;margin-left:-17px}.vscale{left:70px}.vlab{width:32px;font-size:10px}
+  .pin input{width:50px;font-size:14px}.pbtn{padding:6px 9px;gap:7px}
+  .grp .gl{display:none}.grp input{width:56px}
+  .banner .bsub{display:none}.posbox .k .rng-lbl{display:none}
+  .foot .badge{display:none}
+}
+.badge{font-size:10px;background:#3a2f0b;color:var(--amber);border-radius:4px;padding:1px 5px;margin-left:4px}
+
+/* log */
+.log{flex:1;overflow:auto;background:#080b0f;font-family:var(--mono);font-size:11.5px;padding:5px 8px;white-space:pre-wrap;word-break:break-all}
+.ln{display:flex;gap:7px}.ln .t{color:#4f5a66;flex:none}.ln .d{flex:none;width:18px;font-weight:700}
+.tx .d,.tx .m{color:#7cc4ff}.rx .d,.rx .m{color:#9be39b}.sys .d,.sys .m{color:#b9a2ff}.err .d,.err .m{color:var(--red)}.ok .d,.ok .m{color:var(--green)}
+.tbar{display:flex;gap:5px;padding:5px;align-items:center;font-size:11px;color:var(--muted);background:var(--panel2);border-top:1px solid var(--line)}
+.tbar input.msg{flex:1;min-width:60px;font-family:var(--mono);padding:3px 6px}
+.tbar button{padding:3px 8px}
+.tbar label{display:flex;align-items:center;gap:3px;white-space:nowrap}
+
+.addtile{border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--muted);background:transparent}
+.addtile:hover{border-color:var(--accent);color:var(--accent)}
+.addtile .plus{font-size:56px;line-height:1;font-weight:200}
+
+/* toast */
+.toast{position:absolute;left:10px;right:10px;top:92px;z-index:5;background:#2e1414;border:1px solid var(--red);color:#ffd0d0;border-radius:8px;padding:8px 10px;font-weight:600;display:none}
+.toast.show{display:block}
+
+/* modal */
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:10}
+.modal.open{display:flex}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;width:min(560px,94vw);max-height:90vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.box h3{margin:0}.box h4{margin:6px 0 0;font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.5px}
+.form{display:grid;grid-template-columns:170px 1fr;gap:6px 10px;align-items:center}
+.form label{color:var(--muted);font-size:12px}
+.form input{font-family:var(--mono);text-align:left}
+.note{font-size:11.5px;color:var(--muted);background:var(--field);border:1px dashed var(--line);border-radius:8px;padding:6px 9px}
+.box .row{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">◎ Attenuator Console<small>v0.5</small></div>
+  <div class="seg" id="layoutSeg" title="Bố cục">
+    <button data-l="1"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/></svg>Toàn màn hình</button>
+    <button data-l="2"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/><line x1="9" y1="0" x2="9" y2="12" stroke="currentColor"/></svg>1/2</button>
+    <button data-l="3"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/><line x1="6.2" y1="0" x2="6.2" y2="12" stroke="currentColor"/><line x1="11.8" y1="0" x2="11.8" y2="12" stroke="currentColor"/></svg>1/3</button>
+    <button data-l="4"><svg viewBox="0 0 18 12"><rect x=".5" y=".5" width="17" height="11" fill="none" stroke="currentColor"/><line x1="4.75" y1="0" x2="4.75" y2="12" stroke="currentColor"/><line x1="9" y1="0" x2="9" y2="12" stroke="currentColor"/><line x1="13.25" y1="0" x2="13.25" y2="12" stroke="currentColor"/></svg>1/4</button>
+  </div>
+  <button class="primary" id="btnAdd">＋ Thêm thiết bị</button>
+  <label class="toggle" title="Mô phỏng attenuator, không cần cổng COM"><input type="checkbox" id="demoChk"> Demo</label>
+  <div class="spacer"></div>
+  <span class="cfgname" id="cfgName">Chưa lưu cấu hình</span>
+  <button id="btnProto" title="Command giao tiếp">⌨ Giao thức</button>
+  <button id="btnOpen">📂 Mở XML</button>
+  <button id="btnSave">💾 Lưu XML</button>
+  <button id="btnConnAll">🔌 Kết nối tất cả</button>
+  <button id="btnDiscAll">⏏ Ngắt tất cả</button>
+  <span class="clock" id="clock"></span>
+  <input type="file" id="fileIn" accept=".xml" hidden>
+</header>
+<div class="warnbar" id="warn">⚠ Trình duyệt không hỗ trợ Web Serial — hãy mở bằng Chrome hoặc Edge. (Vẫn dùng được chế độ Demo.)</div>
+
+<main class="grid l3" id="grid"></main>
+
+<!-- ===== Station template ===== -->
+<template id="tplDev">
+<section class="dev">
+  <div class="dhead">
+    <span class="no">01</span>
+    <input class="dname" type="text" title="Tên trạm (bấm để sửa)">
+    <button class="icon b-set" title="Cài đặt / Bảo trì">⚙</button>
+    <button class="icon b-max" title="Phóng to / thu nhỏ">⛶</button>
+    <button class="icon danger b-del" title="Xóa thiết bị">✕</button>
+  </div>
+  <div class="connrow">
+    <select class="port" title="Cổng COM"></select>
+    <select class="baud" title="Baud rate">
+      <option>1200</option><option>2400</option><option>4800</option><option>9600</option><option>19200</option>
+      <option>38400</option><option>57600</option><option>115200</option>
+    </select>
+    <button class="primary b-conn">Kết nối</button>
+  </div>
+
+  <div class="toast"></div>
+
+  <div class="dbody">
+    <div class="info">
+      <div class="banner"><span class="bdot"></span><span class="btxt">OFFLINE</span><span class="bsub">Chưa kết nối</span></div>
+      <div class="posbox">
+        <div class="k"><span>Vị trí hiện tại</span><span class="rng-lbl"></span></div>
+        <div class="big"><span class="v-pos">—</span><small>steps</small></div>
+        <div class="arrive"></div>
+      </div>
+      <div class="minis">
+        <div class="mini"><div class="k">Truyền qua</div><div class="mv"><span class="v-tra">—</span><small>%</small></div></div>
+        <div class="mini"><div class="k">Năng lượng TB</div><div class="mv"><span class="v-egy">—</span></div></div>
+        <div class="mini"><div class="k">Tham chiếu</div><div class="mv"><span class="v-ref">—</span></div></div>
+      </div>
+    </div>
+
+    <div class="ctrl">
+      <div class="vs" title="Kéo để chọn vị trí — thả chuột để gửi lệnh">
+        <div class="vin">
+          <div class="vt"><div class="vfill"></div></div>
+          <div class="vneedle"></div>
+          <div class="vthumb"></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="preset" data-k="max"   style="--c:var(--red)"><button class="pbtn"><span class="dot"></span>Maximum</button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
+        <div class="preset" data-k="prod"  style="--c:var(--green)"><button class="pbtn"><span class="dot"></span>Sản xuất</button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
+        <div class="preset" data-k="align" style="--c:var(--blue)"><button class="pbtn"><span class="dot"></span>Chỉnh tia</button><div class="pin"><input type="number" class="pv"><span>steps</span></div></div>
+        <div class="grp" title="Tăng / giảm theo bước">
+          <button class="jog b-minus">−</button>
+          <span class="gl">Bước</span><input type="number" class="stepw" min="1">
+          <button class="jog b-plus">+</button>
+        </div>
+        <div class="grp">
+          <span class="gl">Đặt vị trí</span>
+          <input type="number" class="setval" placeholder="steps">
+          <button class="primary b-go">GO</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="seg mode">
+        <button data-m="manual" class="active">✋ Manual</button>
+        <button data-m="auto" class="auto" title="Cần phần cứng đo năng lượng">⟳ Automatic<span class="badge">Đang phát triển</span></button>
+      </div>
+      <div class="spacer"></div>
+      <span class="devinfo" title="AVE? · CYC? · STATR? — bấm để đọc lại">AVE — · CYC — · Loop —</span>
+      <button class="b-log" title="Ẩn/hiện log">☰ Log</button>
+    </div>
+
+    <div class="logbox">
+      <div class="log"></div>
+      <div class="tbar">
+        <input class="msg" type="text" placeholder="Lệnh tự do (Enter)">
+        <button class="b-send">Gửi</button>
+        <label title="Hiện các lệnh STAT?/POS? tự động"><input type="checkbox" class="showpoll"> Polling</label>
+        <button class="icon b-clear" title="Xóa log">🧹</button>
+        <button class="icon b-savelog" title="Xuất log .txt">⤓</button>
+      </div>
+    </div>
+  </div>
+</section>
+</template>
+
+<!-- ===== Device settings ===== -->
+<div class="modal" id="setModal"><div class="box">
+  <h3>Cài đặt: <span id="setTitle"></span></h3>
+  <h4>Cổng COM</h4>
+  <div class="form">
+    <label>Data bits</label><select id="s_dataBits"><option>7</option><option>8</option></select>
+    <label>Parity</label><select id="s_parity"><option value="none">None</option><option value="even">Even</option><option value="odd">Odd</option></select>
+    <label>Stop bits</label><select id="s_stopBits"><option>1</option><option>2</option></select>
+    <label>Flow control</label><select id="s_flow"><option value="none">None</option><option value="hardware">RTS/CTS</option></select>
+  </div>
+  <div class="note">Chuẩn ACM: D-sub 9 chân (RXD, TXD, GND), 9600 bps, 8 data bits, 1 stop bit, parity OFF, không handshake. Cáp 1:1.</div>
+  <h4>Giới hạn an toàn (steps)</h4>
+  <div class="form">
+    <label>Min</label><input type="number" id="s_min">
+    <label>Max</label><input type="number" id="s_max">
+  </div>
+  <div class="note">Mọi lệnh POS= đều bị giới hạn trong khoảng này. Theo tài liệu, dải thực tế ≈ 425 … 8000 tùy công tắc hành trình.</div>
+  <h4>Bảo trì</h4>
+  <div class="row" style="justify-content:flex-start"><button class="danger" id="s_home">⌂ HOME (về vị trí tham chiếu 50%)</button></div>
+  <div class="note">Chỉ dùng khi attenuator bị mất định vị. Bình thường HOME tự chạy khi bật bộ điều khiển.</div>
+  <div class="row"><button id="setCancel">Hủy</button><button class="primary" id="setOk">Lưu</button></div>
+</div></div>
+
+<!-- ===== Protocol ===== -->
+<div class="modal" id="protoModal"><div class="box">
+  <h3>Giao thức command</h3>
+  <div class="note"><b>{v}</b> = giá trị steps, <b>{v4}</b> = giá trị đệm đủ 4 chữ số (VD 0425). Các ô "Nhận …" là regex; nhóm (…) đầu tiên là giá trị.</div>
+  <div class="form" id="protoForm"></div>
+  <div class="row"><button id="protoReset">Khôi phục mặc định</button><div class="spacer"></div><button id="protoCancel">Hủy</button><button class="primary" id="protoOk">Lưu</button></div>
+</div></div>
+
+<script>
+/* ======================= CONFIG ======================= */
+const PROTO_FIELDS=[
+  ['eol','Ký tự kết thúc','\\r'],
+  ['pollMs','Polling nhanh (ms): STAT/POS/TRA','500'],
+  ['slowPollMs','Polling chậm (ms): EGY/REF','2000'],
+  ['timeoutMs','Chờ phản hồi tối đa (ms)','400'],
+  ['statQ','Trạng thái (BUSY/READY)','STAT?'],
+  ['posQ','Vị trí (steps)','POS?'],
+  ['traQ','Truyền qua (đơn vị 0.1%)','TRA?'],
+  ['egyQ','Năng lượng trung bình','EGY?'],
+  ['refQ','Năng lượng tham chiếu','REF?'],
+  ['aveQ','Số lần lấy trung bình','AVE?'],
+  ['cycQ','Thời gian tích phân','CYC?'],
+  ['statrQ','Loop-control (TRUE/FALSE)','STATR?'],
+  ['posSet','Đặt vị trí','POS={v}'],
+  ['home','HOME','HOME'],
+];
+// key phản hồi ↔ field lệnh
+const QKEYS={stat:'statQ',pos:'posQ',tra:'traQ',egy:'egyQ',ref:'refQ',ave:'aveQ',cyc:'cycQ',statr:'statrQ'};
+const defaultProto=()=>Object.fromEntries(PROTO_FIELDS.map(f=>[f[0],f[2]]));
+const PRESETS=[['max','Maximum',8000,'red'],['prod','Sản xuất',4000,'green'],['align','Chỉnh tia',1200,'blue']];
+const STORE='attConsole.v4';
+
+const hasSerial='serial' in navigator;
+if(!hasSerial) document.getElementById('warn').style.display='block';
+const state={layout:'3',demo:false,proto:defaultProto(),devices:[],fileHandle:null};
+let grantedPorts=[], uid=1;
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const unEsc=s=>s.replace(/\\r/g,'\r').replace(/\\n/g,'\n');
+
+function newDevice(o={}){
+  return Object.assign({
+    id:'d'+(uid++), name:'ATTENUATOR '+(state.devices.length+1), portKey:'', baud:9600,
+    dataBits:8, parity:'none', stopBits:1, flow:'none', minPos:425, maxPos:8000,
+    presets:Object.fromEntries(PRESETS.map(p=>[p[0],p[2]])), step:100, logOpen:true,
+    // runtime
+    pos:null, target:null, arrived:false, status:'off', tra:null, egy:null, ref:null, ave:null, cyc:null, loop:null, miss:0, connected:false, port:null, reader:null,
+    q:[], qBusy:false, waiter:null, el:null, drag:null
+  },o);
+}
+
+/* ======================= PORTS ======================= */
+function portKey(p){
+  const i=p.getInfo(), hex=v=>v==null?'----':v.toString(16).padStart(4,'0').toUpperCase();
+  const same=grantedPorts.filter(q=>{const j=q.getInfo();return j.usbVendorId===i.usbVendorId&&j.usbProductId===i.usbProductId});
+  return `${hex(i.usbVendorId)}:${hex(i.usbProductId)}#${same.indexOf(p)}`;
+}
+async function refreshPorts(){ if(hasSerial) grantedPorts=await navigator.serial.getPorts(); state.devices.forEach(renderPortSelect); }
+function renderPortSelect(d){
+  const sel=d.el.querySelector('.port'); sel.innerHTML='';
+  sel.add(new Option(state.demo?'(Demo — mô phỏng)':'— Chọn cổng COM —',''));
+  grantedPorts.forEach((p,i)=>{
+    const k=portKey(p), used=state.devices.find(x=>x!==d&&x.portKey===k&&x.connected);
+    const o=new Option(`Cổng ${i+1} [${k.replace('#0','')}]`+(used?' — '+used.name:''),k); o.disabled=!!used; sel.add(o);
+  });
+  if(d.portKey&&!grantedPorts.some(p=>portKey(p)===d.portKey)) sel.add(new Option('⚠ '+d.portKey+' (chưa cấp quyền)',d.portKey));
+  if(hasSerial) sel.add(new Option('➕ Thêm cổng mới…','__new'));
+  sel.value=d.portKey;
+}
+
+/* ======================= RENDER ======================= */
+const grid=$('#grid');
+function render(){
+  grid.className='grid l'+state.layout;
+  document.querySelectorAll('#layoutSeg button').forEach(b=>b.classList.toggle('active',b.dataset.l===state.layout));
+  document.body.classList.toggle('demo',state.demo); $('#demoChk').checked=state.demo;
+  grid.innerHTML='';
+  state.devices.forEach((d,i)=>{ if(!d.el) buildDevice(d); d.el.querySelector('.no').textContent=String(i+1).padStart(2,'0'); grid.appendChild(d.el); });
+  const add=document.createElement('button'); add.className='addtile';
+  add.innerHTML='<span class="plus">＋</span><span>Thêm attenuator</span>'; add.onclick=addDevice; grid.appendChild(add);
+  persist();
+}
+
+function buildDevice(d){
+  const el=$('#tplDev').content.firstElementChild.cloneNode(true); d.el=el;
+  const q=s=>el.querySelector(s);
+  q('.dname').value=d.name; q('.baud').value=d.baud; q('.stepw').value=d.step;
+  el.classList.toggle('logclosed',!d.logOpen);
+  el.querySelectorAll('.preset').forEach(p=>{
+    const k=p.dataset.k, inp=p.querySelector('.pv');
+    inp.value=d.presets[k];
+    inp.onchange=()=>{ d.presets[k]=clamp(Math.round(+inp.value||0),d.minPos,d.maxPos); inp.value=d.presets[k]; renderScale(d); updateUI(d); persist(); };
+    p.querySelector('.pbtn').onclick=()=>moveTo(d,d.presets[k]);
+  });
+  renderPortSelect(d); renderScale(d); updateUI(d);
+
+  q('.dname').onchange=e=>{d.name=e.target.value;persist();state.devices.forEach(renderPortSelect)};
+  q('.baud').onchange=e=>{d.baud=+e.target.value;persist()};
+  q('.port').onchange=async e=>{
+    if(e.target.value==='__new'){ try{const p=await navigator.serial.requestPort(); await refreshPorts(); d.portKey=portKey(p);}catch(_){} renderPortSelect(d); }
+    else d.portKey=e.target.value;
+    persist();
+  };
+  q('.b-conn').onclick=()=>d.connected?disconnect(d):connect(d);
+  q('.b-set').onclick=()=>openSettings(d);
+  q('.b-max').onclick=()=>{const m=!el.classList.contains('max');state.devices.forEach(x=>x.el.classList.remove('max'));el.classList.toggle('max',m);grid.classList.toggle('has-max',m)};
+  q('.b-del').onclick=async()=>{ if(!confirm('Xóa "'+d.name+'"?'))return; if(d.connected) await disconnect(d); state.devices=state.devices.filter(x=>x!==d); grid.classList.remove('has-max'); render(); };
+
+  q('.stepw').onchange=e=>{d.step=Math.max(1,Math.round(+e.target.value||1));e.target.value=d.step;persist()};
+  q('.b-minus').onclick=()=>moveTo(d,(d.target??d.pos??d.minPos)-d.step);
+  q('.b-plus').onclick=()=>moveTo(d,(d.target??d.pos??d.minPos)+d.step);
+  const go=()=>{ const v=parseFloat(q('.setval').value); if(!isNaN(v)) moveTo(d,v); };
+  q('.b-go').onclick=go; q('.setval').onkeydown=e=>{if(e.key==='Enter')go()};
+  q('.seg.mode button[data-m=auto]').onclick=()=>toast(d,'Chế độ Automatic đang phát triển — cần phần cứng đo năng lượng.');
+
+  // vertical slider
+  const vs=q('.vs'), vin=q('.vin');
+  const valAt=y=>{ const r=vin.getBoundingClientRect(); return Math.round(d.minPos+clamp(1-(y-r.top)/r.height,0,1)*(d.maxPos-d.minPos)); };
+  vs.onpointerdown=e=>{ if(!canControl(d)) return toastWhy(d); vs.setPointerCapture(e.pointerId); d.drag=valAt(e.clientY); updateUI(d); };
+  vs.onpointermove=e=>{ if(d.drag==null)return; d.drag=valAt(e.clientY); updateUI(d); };
+  vs.onpointerup=()=>{ if(d.drag==null)return; const v=d.drag; d.drag=null; moveTo(d,v); };
+  vs.onpointercancel=()=>{d.drag=null;updateUI(d)};
+
+  q('.devinfo').onclick=()=>['ave','cyc','statr'].forEach(k=>query(d,k));
+  q('.b-log').onclick=()=>{ d.logOpen=!d.logOpen; el.classList.toggle('logclosed',!d.logOpen); persist(); };
+  q('.b-send').onclick=()=>{ const v=q('.msg').value.trim(); if(v){ enqueue(d,v,{key:keyOf(v),front:true,noReply:!v.endsWith('?')}); q('.msg').value=''; } };
+  q('.msg').onkeydown=e=>{if(e.key==='Enter')q('.b-send').click()};
+  q('.b-clear').onclick=()=>q('.log').innerHTML='';
+  q('.b-savelog').onclick=()=>download(d.name+'_log.txt',q('.log').innerText,'text/plain');
+  return el;
+}
+
+const pct=(d,v)=>clamp((v-d.minPos)/((d.maxPos-d.minPos)||1),0,1)*100;
+function renderScale(d){
+  const vin=d.el.querySelector('.vin'); vin.querySelectorAll('.vmark,.vlab,.vscale').forEach(n=>n.remove());
+  for(let i=0;i<=4;i++){ const v=Math.round(d.minPos+(d.maxPos-d.minPos)*i/4), s=document.createElement('div'); s.className='vscale'; s.style.bottom=(i*25)+'%'; s.textContent=v; vin.appendChild(s); }
+  PRESETS.forEach(([k,,,c])=>{
+    const p=pct(d,d.presets[k]), m=document.createElement('div'), l=document.createElement('div');
+    m.className='vmark'; l.className='vlab'; m.style.bottom=l.style.bottom=p+'%'; m.style.setProperty('--c',`var(--${c})`); l.style.setProperty('--c',`var(--${c})`);
+    l.textContent=d.presets[k]; vin.insertBefore(m,vin.querySelector('.vneedle')); vin.appendChild(l);
+  });
+  d.el.querySelector('.rng-lbl').textContent=`giới hạn ${d.minPos} … ${d.maxPos}`;
+  d.el.querySelectorAll('.pv').forEach(i=>{i.min=d.minPos;i.max=d.maxPos});
+}
+
+const canControl=d=>d.connected&&d.status==='ready';
+const BANNER={
+  off:['','OFFLINE','Chưa kết nối'],
+  sync:['sync','ĐANG ĐỒNG BỘ','Đọc trạng thái & vị trí…'],
+  ready:['ready','READY','Cho phép điều khiển'],
+  busy:['busy','BUSY','Không thể điều khiển thủ công'],
+  noresp:['err','KHÔNG PHẢN HỒI','Kiểm tra cáp / baud rate'],
+};
+function updateUI(d){
+  const q=s=>d.el.querySelector(s), has=v=>v!=null&&!isNaN(v);
+  // banner
+  const [cls,txt,sub]=BANNER[d.connected?d.status:'off'];
+  q('.banner').className='banner '+cls; q('.btxt').textContent=txt; q('.bsub').textContent=(d.connected&&state.demo&&!d.port?'Demo · ':'')+sub;
+  // position
+  q('.v-pos').textContent=has(d.pos)?d.pos:'—';
+  q('.v-tra').textContent=has(d.tra)?d.tra.toFixed(1):'—';
+  q('.v-egy').textContent=d.egy??'—';
+  q('.v-ref').textContent=d.ref??'—';
+  q('.devinfo').innerHTML=`AVE ${d.ave??'—'} · CYC ${d.cyc??'—'} · Loop <span class="${d.loop?'on':''}">${d.loop==null?'—':d.loop?'ON':'OFF'}</span>`;
+  const a=q('.arrive');
+  if(d.drag!=null){ a.className='arrive mov'; a.textContent='⇕ Chọn: '+d.drag+' — thả chuột để gửi'; }
+  else if(has(d.target)){ a.className='arrive mov'; a.textContent='➜ Đang di chuyển tới '+d.target+' …'; }
+  else if(d.arrived&&has(d.pos)){ a.className='arrive ok'; a.textContent='✔ Đã đến vị trí '+d.pos; }
+  else a.textContent='', a.className='arrive';
+  // slider
+  q('.vfill').style.height=(has(d.pos)?pct(d,d.pos):0)+'%';
+  const nd=q('.vneedle'); nd.style.display=has(d.pos)?'':'none'; if(has(d.pos)) nd.style.bottom=pct(d,d.pos)+'%';
+  const tv=d.drag??d.target??d.pos, th=q('.vthumb'); th.style.display=has(tv)?'':'none'; if(has(tv)) th.style.bottom=pct(d,tv)+'%';
+  q('.vs').classList.toggle('dis',!canControl(d));
+  // presets
+  d.el.querySelectorAll('.preset').forEach(p=>{
+    const k=p.dataset.k, v=d.presets[k], at=d.connected&&d.target==null&&d.pos===v;
+    p.classList.toggle('blink',at&&(k==='prod'||k==='max'));
+    p.classList.toggle('on',at&&k==='align');
+    p.classList.toggle('go',d.target===v);
+  });
+  const en=canControl(d);
+  d.el.querySelectorAll('.side button').forEach(b=>b.disabled=!en);
+  // connect button
+  const b=q('.b-conn'); b.textContent=d.connected?'Ngắt':'Kết nối'; b.classList.toggle('primary',!d.connected); b.classList.toggle('danger',d.connected);
+  d.el.classList.toggle('on',d.connected);
+}
+function toast(d,msg){ const t=d.el.querySelector('.toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2500); }
+function toastWhy(d){ toast(d, !d.connected?'Chưa kết nối thiết bị.':d.status==='busy'?'Thiết bị đang BUSY — không thể điều khiển thủ công.':'Thiết bị chưa sẵn sàng (đang chờ READY).'); }
+
+/* ======================= ACTIONS ======================= */
+function fillCmd(tpl,v){ return tpl.replace(/\{v4\}/g,String(v).padStart(4,'0')).replace(/\{v\}/g,v); }
+function moveTo(d,v){
+  if(!canControl(d)){ toastWhy(d); updateUI(d); return; }
+  v=clamp(Math.round(v),d.minPos,d.maxPos);
+  d.target=v; d.arrived=false; d.moveStart=Date.now(); updateUI(d);
+  enqueue(d,fillCmd(state.proto.posSet,v),{front:true,noReply:true});
+  query(d,'pos',true);
+}
+const query=(d,key,quiet)=>enqueue(d,state.proto[QKEYS[key]],{key,quiet});
+const keyOf=t=>Object.keys(QKEYS).find(k=>state.proto[QKEYS[k]]===t);
+function home(d){
+  if(!canControl(d)) return toastWhy(d);
+  if(!confirm('Gửi lệnh HOME tới "'+d.name+'"?\nAttenuator sẽ chạy về vị trí tham chiếu (50% truyền qua).\nChỉ dùng khi mất định vị.')) return;
+  d.target=null; d.arrived=false; enqueue(d,state.proto.home,{front:true,noReply:true}); log(d,'sys','Đã gửi HOME');
+}
+
+/* ======================= LOG ======================= */
+function log(d,type,text){
+  const L=d.el.querySelector('.log'), ln=document.createElement('div'); ln.className='ln '+type;
+  const now=new Date(), t=now.toTimeString().slice(0,8)+'.'+String(now.getMilliseconds()).padStart(3,'0');
+  ln.innerHTML=`<span class="t">${t}</span><span class="d">${{tx:'TX',rx:'RX',sys:'••',err:'!!',ok:'✔'}[type]}</span><span class="m"></span>`;
+  ln.querySelector('.m').textContent=text; L.appendChild(ln);
+  if(L.childElementCount>3000) L.firstChild.remove();
+  L.scrollTop=L.scrollHeight;
+}
+const vis=s=>s.replace(/\r/g,'<CR>').replace(/\n/g,'<LF>');
+
+/* ======================= COMMAND QUEUE =======================
+   Giao tiếp simplex, phản hồi KHÔNG có tiền tố (VD "POS?" → "2400").
+   → Mỗi lúc chỉ 1 lệnh: gửi → chờ 1 dòng phản hồi (hoặc timeout) → gán phản hồi cho đúng lệnh đó. */
+function enqueue(d,text,opt={}){
+  if(!d.connected||!text) return;
+  const item={text,...opt}; opt.front?d.q.unshift(item):d.q.push(item); pump(d);
+}
+async function pump(d){
+  if(d.qBusy||!d.q.length||!d.connected) return;
+  d.qBusy=true; const it=d.q.shift();
+  const show=!it.quiet||d.el.querySelector('.showpoll').checked;
+  if(show) log(d,'tx',vis(it.text+unEsc(state.proto.eol)));
+  let line=null;
+  if(it.noReply){ await writeText(d,it.text); await new Promise(r=>setTimeout(r,30)); }   // POS= / HOME: thiết bị không phản hồi
+  else {
+    const wait=new Promise(res=>{ d.waiter=res; setTimeout(()=>res(null),+state.proto.timeoutMs||400); });
+    await writeText(d,it.text); line=await wait; d.waiter=null;
+  }
+  if(line!=null){ if(show) log(d,'rx',line); applyResponse(d,it.key,line); }
+  else if(it.key==='stat'){ if(++d.miss>=3&&d.status!=='noresp'){ d.status='noresp'; log(d,'err','Thiết bị không phản hồi STAT?'); updateUI(d);} }
+  await new Promise(r=>setTimeout(r,15));   // khoảng nghỉ ngắn giữa 2 lệnh
+  d.qBusy=false; pump(d);
+}
+async function writeText(d,text){
+  if(isDemo(d)) return simulate(d,text);
+  const w=d.port.writable.getWriter();
+  try{ await w.write(new TextEncoder().encode(text+unEsc(state.proto.eol))); }catch(e){ log(d,'err',e.message); } finally{ w.releaseLock(); }
+}
+function handleLine(d,line){
+  if(d.waiter) d.waiter(line);
+  else log(d,'rx',line+'   (không có lệnh chờ)');
+}
+function applyResponse(d,key,line){
+  const n=parseFloat(line), num=/^-?\d+(\.\d+)?$/.test(line);
+  switch(key){
+    case 'stat':
+      if(/^READY$/i.test(line)) setStatus(d,'ready');
+      else if(/^BUSY$/i.test(line)) setStatus(d,'busy');
+      else log(d,'err','STAT? trả về không hợp lệ: '+line);
+      break;
+    case 'pos': if(num) setPos(d,Math.round(n)); else log(d,'err','POS? trả về không hợp lệ: '+line); break;
+    case 'tra': if(num) d.tra=n/10; break;            // đơn vị 0.1 %
+    case 'egy': d.egy=line; break;
+    case 'ref': d.ref=line; break;
+    case 'ave': d.ave=line; break;
+    case 'cyc': d.cyc=line; break;
+    case 'statr': d.loop=/^TRUE$/i.test(line); break;
+  }
+  updateUI(d);
+}
+function setStatus(d,s){
+  d.miss=0;
+  if(d.status!==s){ if(d.status!=='sync'||s==='busy') log(d,s==='ready'?'ok':'err','Trạng thái: '+s.toUpperCase()); d.status=s; updateUI(d); }
+}
+function setPos(d,p){
+  const first=d.pos==null; d.pos=p;
+  if(first) log(d,'sys','Đồng bộ vị trí: '+p+' steps');
+  if(d.target!=null&&p===d.target){ d.target=null; d.arrived=true; log(d,'ok','Đã đến vị trí '+p); }
+  else if(d.target!=null&&Date.now()-d.moveStart>30000){ log(d,'err',`Quá 30 s chưa đến ${d.target} (đang ở ${p})`); d.target=null; }
+  updateUI(d);
+}
+
+/* ======================= CONNECT ======================= */
+const isDemo=d=>state.demo&&!d.port;
+async function connect(d){
+  if(!(state.demo&&!d.portKey)){
+    if(!hasSerial) return toast(d,'Trình duyệt không hỗ trợ Web Serial');
+    const port=grantedPorts.find(p=>portKey(p)===d.portKey);
+    if(!port) return toast(d,'Chưa chọn cổng COM hoặc cổng chưa được cấp quyền');
+    try{ await port.open({baudRate:d.baud,dataBits:d.dataBits,stopBits:d.stopBits,parity:d.parity,flowControl:d.flow}); }
+    catch(e){ log(d,'err',e.message); return toast(d,'Không mở được cổng: '+e.message); }
+    d.port=port; readLoop(d);
+  } else { d.sim={pos:d.sim?.pos??4000,target:null}; }
+  Object.assign(d,{connected:true,status:'sync',pos:null,target:null,arrived:false,miss:0,q:[],qBusy:false,tra:null,egy:null,ref:null,ave:null,cyc:null,loop:null});
+  log(d,'sys',d.port?`Kết nối ${d.portKey} @ ${d.baud}`:'Demo: kết nối thiết bị mô phỏng');
+  state.devices.forEach(renderPortSelect); updateUI(d);
+  // Đồng bộ ban đầu: trạng thái, vị trí (→ thanh kéo), truyền qua, năng lượng, thông số
+  ['stat','pos','tra','egy','ref','ave','cyc','statr'].forEach(k=>query(d,k));
+  clearInterval(d._poll); clearInterval(d._slow);
+  d._poll=setInterval(()=>{ if(d.connected&&d.q.length===0) ['stat','pos','tra'].forEach(k=>query(d,k,true)); },Math.max(150,+state.proto.pollMs||500));
+  d._slow=setInterval(()=>{ if(d.connected&&d.q.length<3) ['egy','ref'].forEach(k=>query(d,k,true)); },Math.max(500,+state.proto.slowPollMs||2000));
+}
+async function readLoop(d){
+  const dec=new TextDecoder(); let buf='';
+  while(d.port&&d.port.readable){
+    d.reader=d.port.readable.getReader();
+    try{
+      while(true){
+        const {value,done}=await d.reader.read(); if(done) break;
+        buf+=dec.decode(value,{stream:true});
+        let i; while((i=buf.search(/\r\n|\r|\n/))>=0){ const l=buf.slice(0,i); buf=buf.slice(i+(buf.substr(i,2)==='\r\n'?2:1)); if(l.trim()) handleLine(d,l.trim()); }
+      }
+    }catch(e){ if(d.connected) log(d,'err',e.message); }
+    finally{ d.reader?.releaseLock(); d.reader=null; }
+    if(!d.connected) break;
+  }
+}
+async function disconnect(d){
+  d.connected=false; clearInterval(d._poll); clearInterval(d._slow); clearInterval(d._sim); d.q=[]; d.waiter?.(null);
+  try{ if(d.reader) await d.reader.cancel(); await d.port?.close(); }catch(e){}
+  d.port=null; d.target=null; d.status='off'; log(d,'sys','Đã ngắt kết nối'); state.devices.forEach(renderPortSelect); updateUI(d);
+}
+
+/* ======================= DEMO SIMULATOR ======================= */
+function simulate(d,text){
+  const P=state.proto, S=d.sim, reply=s=>setTimeout(()=>d.connected&&handleLine(d,String(s)),10+Math.random()*25);
+  const tra=()=>Math.round(100+900*pct(d,S.pos)/100);          // 0.1 %
+  switch(text){
+    case P.statQ: return reply('READY');
+    case P.posQ: return reply(S.pos);
+    case P.traQ: return reply(tra());
+    case P.egyQ: return reply((tra()*0.0052*(1+(Math.random()-.5)*0.02)).toFixed(3));
+    case P.refQ: return reply('5.200');
+    case P.aveQ: return reply(10);
+    case P.cycQ: return reply(100);
+    case P.statrQ: return reply('FALSE');
+  }
+  const startMove=t=>{ S.target=t; clearInterval(d._sim); d._sim=setInterval(()=>{ const df=S.target-S.pos; if(!df){clearInterval(d._sim);S.target=null;return;} S.pos+=Math.sign(df)*Math.min(Math.abs(df),45); },30); };
+  const tplRe=new RegExp('^'+P.posSet.replace(/[.*+?^$()|[\]\\]/g,'\\$&').replace(/\\?\{v4?\\?\}/,'(\\d+)')+'$');
+  const m=tplRe.exec(text);
+  if(m) return startMove(parseInt(m[1],10));     // POS= không phản hồi (giả định)
+  if(text===P.home) return startMove(4200);
+  // lệnh lạ: thiết bị bỏ qua (error-tolerant)
+}
+
+/* ======================= SETTINGS ======================= */
+let setDev=null;
+function openSettings(d){
+  setDev=d; $('#setTitle').textContent=d.name;
+  for(const k of ['dataBits','parity','stopBits','flow']) $('#s_'+k).value=d[k];
+  $('#s_min').value=d.minPos; $('#s_max').value=d.maxPos;
+  $('#setModal').classList.add('open');
+}
+$('#setCancel').onclick=()=>$('#setModal').classList.remove('open');
+$('#s_home').onclick=()=>{ $('#setModal').classList.remove('open'); home(setDev); };
+$('#setOk').onclick=()=>{
+  const d=setDev;
+  d.dataBits=+$('#s_dataBits').value; d.parity=$('#s_parity').value; d.stopBits=+$('#s_stopBits').value; d.flow=$('#s_flow').value;
+  const mn=Math.round(+$('#s_min').value), mx=Math.round(+$('#s_max').value);
+  if(!(mx>mn)) return alert('Max phải lớn hơn Min');
+  d.minPos=mn; d.maxPos=mx; for(const k in d.presets){ d.presets[k]=clamp(d.presets[k],mn,mx); d.el.querySelector(`.preset[data-k=${k}] .pv`).value=d.presets[k]; }
+  renderScale(d); updateUI(d); persist(); $('#setModal').classList.remove('open');
+};
+
+/* ======================= PROTOCOL ======================= */
+function openProto(vals=state.proto){
+  $('#protoForm').innerHTML=PROTO_FIELDS.map(([k,l])=>`<label>${l}</label><input type="text" data-k="${k}">`).join('');
+  $('#protoForm').querySelectorAll('input').forEach(i=>i.value=vals[i.dataset.k]??'');
+  $('#protoModal').classList.add('open');
+}
+$('#btnProto').onclick=()=>openProto();
+$('#protoReset').onclick=()=>openProto(defaultProto());
+$('#protoCancel').onclick=()=>$('#protoModal').classList.remove('open');
+$('#protoOk').onclick=()=>{ $('#protoForm').querySelectorAll('input').forEach(i=>state.proto[i.dataset.k]=i.value); persist(); $('#protoModal').classList.remove('open'); };
+
+/* ======================= XML ======================= */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const TAG=k=>k[0].toUpperCase()+k.slice(1);
+function toXML(){
+  let x=`<?xml version="1.0" encoding="UTF-8"?>\n<AttenuatorConsoleConfig version="4" layout="${state.layout}" saved="${new Date().toISOString()}">\n  <Protocol>\n`;
+  PROTO_FIELDS.forEach(([k])=>x+=`    <${TAG(k)}>${esc(state.proto[k])}</${TAG(k)}>\n`);
+  x+=`  </Protocol>\n`;
+  state.devices.forEach(d=>{
+    x+=`  <Device name="${esc(d.name)}" port="${esc(d.portKey)}" baud="${d.baud}" dataBits="${d.dataBits}" parity="${d.parity}" stopBits="${d.stopBits}" flowControl="${d.flow}" minPos="${d.minPos}" maxPos="${d.maxPos}" stepWidth="${d.step}" logOpen="${d.logOpen}">\n`;
+    PRESETS.forEach(([k,n])=>x+=`    <Preset key="${k}" name="${n}" steps="${d.presets[k]}"/>\n`);
+    x+=`  </Device>\n`;
+  });
+  return x+`</AttenuatorConsoleConfig>\n`;
+}
+function fromXML(txt){
+  const doc=new DOMParser().parseFromString(txt,'application/xml');
+  if(doc.querySelector('parsererror')) throw Error('File XML không hợp lệ');
+  const r=doc.documentElement, A=(n,a,def)=>n?.getAttribute(a)??def;
+  state.devices.filter(d=>d.connected).forEach(disconnect);
+  state.layout=A(r,'layout','3');
+  state.proto=defaultProto();
+  const pr=r.querySelector('Protocol'); if(pr) PROTO_FIELDS.forEach(([k])=>{const n=pr.querySelector(TAG(k)); if(n) state.proto[k]=n.textContent;});
+  state.devices=[];
+  [...r.querySelectorAll('Device')].forEach(n=>{
+    const presets=Object.fromEntries(PRESETS.map(p=>[p[0],p[2]]));
+    n.querySelectorAll('Preset').forEach(p=>presets[p.getAttribute('key')]=+p.getAttribute('steps'));
+    state.devices.push(newDevice({ name:A(n,'name'), portKey:A(n,'port',''), baud:+A(n,'baud',9600), dataBits:+A(n,'dataBits',8),
+      parity:A(n,'parity','none'), stopBits:+A(n,'stopBits',1), flow:A(n,'flowControl','none'),
+      minPos:+A(n,'minPos',425), maxPos:+A(n,'maxPos',8000), step:+A(n,'stepWidth',100), logOpen:A(n,'logOpen','true')!=='false', presets }));
+  });
+  render();
+}
+function download(name,content,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
+async function saveXML(){
+  const xml=toXML();
+  if(window.showSaveFilePicker){
+    try{
+      if(!state.fileHandle) state.fileHandle=await showSaveFilePicker({suggestedName:'attenuator_config.xml',types:[{description:'XML',accept:{'application/xml':['.xml']}}]});
+      const w=await state.fileHandle.createWritable(); await w.write(xml); await w.close();
+      setCfgName(state.fileHandle.name+' ✓ '+new Date().toLocaleTimeString()); return;
+    }catch(e){ if(e.name==='AbortError') return; }
+  }
+  download('attenuator_config.xml',xml,'application/xml'); setCfgName('attenuator_config.xml (đã tải xuống)');
+}
+async function openXML(){
+  if(window.showOpenFilePicker){
+    try{ const [h]=await showOpenFilePicker({types:[{description:'XML',accept:{'application/xml':['.xml']}}]}); fromXML(await (await h.getFile()).text()); state.fileHandle=h; setCfgName(h.name); await refreshPorts(); }
+    catch(e){ if(e.name!=='AbortError') alert(e.message); }
+  } else $('#fileIn').click();
+}
+$('#fileIn').onchange=async e=>{ const f=e.target.files[0]; if(!f)return; try{fromXML(await f.text());setCfgName(f.name);await refreshPorts();}catch(err){alert(err.message)} e.target.value=''; };
+function setCfgName(n){ $('#cfgName').textContent='📄 '+n; }
+function persist(){ try{ localStorage.setItem(STORE,toXML()); localStorage.setItem(STORE+'.demo',state.demo?'1':''); }catch(e){} }
+
+/* ======================= TOP BAR ======================= */
+function addDevice(){ state.devices.push(newDevice()); render(); const d=state.devices.at(-1); d.el.scrollIntoView({behavior:'smooth'}); d.el.querySelector('.dname').select(); }
+$('#btnAdd').onclick=addDevice;
+document.querySelectorAll('#layoutSeg button').forEach(b=>b.onclick=()=>{state.layout=b.dataset.l;grid.classList.remove('has-max');state.devices.forEach(d=>d.el.classList.remove('max'));render();});
+$('#btnSave').onclick=saveXML; $('#btnOpen').onclick=openXML;
+$('#btnConnAll').onclick=()=>state.devices.filter(d=>!d.connected&&(d.portKey||state.demo)).forEach(connect);
+$('#btnDiscAll').onclick=()=>state.devices.filter(d=>d.connected).forEach(disconnect);
+$('#demoChk').onchange=e=>{ state.demo=e.target.checked; state.devices.filter(d=>d.connected&&!d.port).forEach(disconnect); render(); state.devices.forEach(renderPortSelect); };
+document.addEventListener('keydown',e=>{ if(e.ctrlKey&&e.key==='s'){e.preventDefault();saveXML();} if(e.key==='Escape') document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open')); });
+if(hasSerial){
+  navigator.serial.addEventListener('connect',refreshPorts);
+  navigator.serial.addEventListener('disconnect',e=>{ state.devices.filter(d=>d.port===e.target).forEach(d=>{log(d,'err','Cáp COM đã bị rút');disconnect(d)}); refreshPorts(); });
+}
+setInterval(()=>$('#clock').textContent=new Date().toLocaleTimeString('vi-VN'),1000);
+
+/* ======================= INIT ======================= */
+(async()=>{
+  let saved=null; try{ saved=localStorage.getItem(STORE); state.demo=!!localStorage.getItem(STORE+'.demo'); }catch(e){}
+  try{ if(saved) fromXML(saved); else throw 0; }catch(e){ state.devices=[]; for(let i=0;i<3;i++) state.devices.push(newDevice()); render(); }
+  await refreshPorts();
+})();
+</script>
+</body>
+</html>

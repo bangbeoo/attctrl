@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AttenuatorConsoleConfig version="4" layout="3">
+  <Protocol>
+    <Eol>\r</Eol>
+    <PollMs>500</PollMs>
+    <SlowPollMs>2000</SlowPollMs>
+    <TimeoutMs>400</TimeoutMs>
+    <StatQ>STAT?</StatQ>
+    <PosQ>POS?</PosQ>
+    <TraQ>TRA?</TraQ>
+    <EgyQ>EGY?</EgyQ>
+    <RefQ>REF?</RefQ>
+    <AveQ>AVE?</AveQ>
+    <CycQ>CYC?</CycQ>
+    <StatrQ>STATR?</StatrQ>
+    <PosSet>POS={v}</PosSet>
+    <Home>HOME</Home>
+  </Protocol>
+  <Device name="LINE 1" port="" baud="9600" dataBits="8" parity="none" stopBits="1" flowControl="none" minPos="425" maxPos="8000" stepWidth="100" logOpen="true">
+    <Preset key="max" name="Maximum" steps="8000"/>
+    <Preset key="prod" name="Sản xuất" steps="4000"/>
+    <Preset key="align" name="Chỉnh tia" steps="1200"/>
+  </Device>
+  <Device name="LINE 2" port="" baud="9600" dataBits="8" parity="none" stopBits="1" flowControl="none" minPos="425" maxPos="8000" stepWidth="100" logOpen="true">
+    <Preset key="max" name="Maximum" steps="8000"/>
+    <Preset key="prod" name="Sản xuất" steps="4000"/>
+    <Preset key="align" name="Chỉnh tia" steps="1200"/>
+  </Device>
+  <Device name="LINE 3" port="" baud="9600" dataBits="8" parity="none" stopBits="1" flowControl="none" minPos="425" maxPos="8000" stepWidth="100" logOpen="true">
+    <Preset key="max" name="Maximum" steps="8000"/>
+    <Preset key="prod" name="Sản xuất" steps="4000"/>
+    <Preset key="align" name="Chỉnh tia" steps="1200"/>
+  </Device>
+</AttenuatorConsoleConfig>
