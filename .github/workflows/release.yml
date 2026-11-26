@@ -1,0 +1,38 @@
+name: Release ZIP
+
+# Push a version tag (e.g. `git tag v0.7 && git push origin v0.7`)
+# → builds AttenuatorConsole.zip and attaches it to a GitHub Release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ZIP
+        run: |
+          mkdir -p dist/AttenuatorConsole
+          cp index.html config.example.xml README.md "Start Attenuator Console.bat" dist/AttenuatorConsole/
+          cd dist
+          zip -r AttenuatorConsole.zip AttenuatorConsole
+          unzip -l AttenuatorConsole.zip
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          NOTES="Download **AttenuatorConsole.zip**, extract, then double-click **Start Attenuator Console.bat** (or open index.html in Chrome/Edge).
+
+          Tải **AttenuatorConsole.zip**, giải nén, rồi nhấp đúp **Start Attenuator Console.bat** (hoặc mở index.html bằng Chrome/Edge)."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/AttenuatorConsole.zip --clobber
+          else
+            gh release create "$TAG" dist/AttenuatorConsole.zip --title "Attenuator Console $TAG" --notes "$NOTES" --latest
+          fi

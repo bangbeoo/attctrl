@@ -1,5 +1,11 @@
 # Attenuator Console
 
+[![Download ZIP](https://img.shields.io/badge/⬇_Download-AttenuatorConsole.zip-2ea44f?style=for-the-badge)](https://github.com/bangbeoo/attctrl/releases/latest/download/AttenuatorConsole.zip)
+&nbsp;[All releases](https://github.com/bangbeoo/attctrl/releases)
+
+**Quick start:** download the ZIP → extract → double-click **`Start Attenuator Console.bat`** (opens in Chrome/Edge).
+**Bắt đầu nhanh:** tải ZIP → giải nén → nhấp đúp **`Start Attenuator Console.bat`** (mở bằng Chrome/Edge).
+
 Web app chạy local (một file HTML duy nhất) để điều khiển nhiều **Attenuator Control Module (ACM)** qua cổng COM, mỗi cổng COM một thiết bị.
 
 Giao diện song ngữ **English (mặc định) / Tiếng Việt**: chuyển bằng nút **EN | VI** trên thanh trên cùng.
@@ -9,7 +15,15 @@ Giao diện song ngữ **English (mặc định) / Tiếng Việt**: chuyển b�
 - Cáp serial 1:1, D-sub 9 chân (RXD, TXD, GND), hoặc bộ chuyển USB–RS232.
 
 ## Chạy
-Nhấp đúp `index.html` để mở bằng Chrome/Edge. Không cần cài đặt hay chạy server.
+Nhấp đúp **`Start Attenuator Console.bat`**: app mở trong cửa sổ riêng của Chrome (nếu có) hoặc Edge. Cũng có thể mở trực tiếp `index.html` bằng Chrome/Edge. Không cần cài đặt hay chạy server.
+
+## Phát hành bản mới
+Đẩy một tag phiên bản lên GitHub, GitHub Actions sẽ tự đóng gói `AttenuatorConsole.zip` và tạo Release:
+
+```bash
+git tag v0.7
+git push origin v0.7
+```
 
 Lần đầu trên mỗi máy, ở ô **COM port** của từng thiết bị chọn **"➕ Add new port…"** (VI: "➕ Thêm cổng mới…") rồi chọn đúng COMx trong hộp thoại của trình duyệt. Trình duyệt sẽ nhớ quyền truy cập cho những lần sau.
 
