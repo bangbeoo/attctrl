@@ -18,12 +18,9 @@ Giao diện song ngữ **English (mặc định) / Tiếng Việt**: chuyển b�
 Nhấp đúp **`Start Attenuator Console.bat`**: app mở trong cửa sổ riêng của Chrome (nếu có) hoặc Edge. Cũng có thể mở trực tiếp `index.html` bằng Chrome/Edge. Không cần cài đặt hay chạy server.
 
 ## Phát hành bản mới
-Đẩy một tag phiên bản lên GitHub, GitHub Actions sẽ tự đóng gói `AttenuatorConsole.zip` và tạo Release:
-
-```bash
-git tag v0.7
-git push origin v0.7
-```
+Mỗi lần push lên `main`, GitHub Actions đọc số phiên bản trong `index.html` (`<small>v0.6</small>`), đóng gói `AttenuatorConsole.zip` và đưa lên Release cùng tên:
+- **Đổi số phiên bản** (ví dụ `v0.7`) → tạo Release mới, nút Download ở trên tự trỏ tới bản mới nhất.
+- **Giữ nguyên số phiên bản** → chỉ thay file ZIP của Release hiện tại.
 
 Lần đầu trên mỗi máy, ở ô **COM port** của từng thiết bị chọn **"➕ Add new port…"** (VI: "➕ Thêm cổng mới…") rồi chọn đúng COMx trong hộp thoại của trình duyệt. Trình duyệt sẽ nhớ quyền truy cập cho những lần sau.
 

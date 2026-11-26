@@ -1,19 +1,40 @@
 name: Release ZIP
 
-# Push a version tag (e.g. `git tag v0.7 && git push origin v0.7`)
-# → builds AttenuatorConsole.zip and attaches it to a GitHub Release.
+# On every push to main: read the version from index.html (<small>vX.Y</small>),
+# build AttenuatorConsole.zip and publish it as GitHub Release "vX.Y".
+#  - New version number  → new release (tag created by GitHub).
+#  - Same version number → the ZIP of the existing release is replaced.
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'config.example.xml'
+      - 'README.md'
+      - 'Start Attenuator Console.bat'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-zip
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Read version
+        id: ver
+        run: |
+          VER=$(grep -oP '<small>\Kv[0-9]+(\.[0-9]+)+(?=</small>)' index.html | head -1)
+          test -n "$VER" || { echo "Version not found in index.html"; exit 1; }
+          echo "tag=$VER" >> "$GITHUB_OUTPUT"
+          echo "Version: $VER"
 
       - name: Build ZIP
         run: |
@@ -26,13 +47,16 @@ jobs:
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.ver.outputs.tag }}
         run: |
           NOTES="Download **AttenuatorConsole.zip**, extract, then double-click **Start Attenuator Console.bat** (or open index.html in Chrome/Edge).
 
           Tải **AttenuatorConsole.zip**, giải nén, rồi nhấp đúp **Start Attenuator Console.bat** (hoặc mở index.html bằng Chrome/Edge)."
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" dist/AttenuatorConsole.zip --clobber
+            echo "Updated ZIP of existing release $TAG"
           else
-            gh release create "$TAG" dist/AttenuatorConsole.zip --title "Attenuator Console $TAG" --notes "$NOTES" --latest
+            gh release create "$TAG" dist/AttenuatorConsole.zip --target "$GITHUB_SHA" \
+              --title "Attenuator Console $TAG" --notes "$NOTES" --latest
+            echo "Created release $TAG"
           fi
